@@ -7,9 +7,9 @@ namespace Papeles
   class RenderedDocument : DrawingArea
   {
     RenderContext rc;
-    PdfDocument doc;
+    IDocument doc;
 
-    public RenderedDocument(RenderContext rc, PdfDocument doc)
+    public RenderedDocument(RenderContext rc, IDocument doc)
     {
       int height, width;
 
@@ -55,7 +55,7 @@ namespace Papeles
       Window myWin = new Window("Papeles");
       myWin.DeleteEvent += delete_event;
 
-      PdfDocument doc = new PdfDocument("file:///home/jacinto/Documents/papers/inference-secco08.pdf", "");
+      IDocument doc = new PdfDocument("file:///home/jacinto/Documents/papers/inference-secco08.pdf", "");
 
       // double pageHeight, pageWidth;
       // page.GetSize(out pageWidth, out pageHeight);

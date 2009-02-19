@@ -3,20 +3,40 @@ using Poppler;
 
 namespace Papeles
 {
-  public class PdfDocument
+  public class PdfDocument : IDocument
   {
     Document document;
+    string password;
+
+    public int NPages
+    {
+      get {
+        return document.NPages;
+      }
+    }
+
+    public string Password
+    {
+      get {
+        return password;
+      }
+      set {
+        password = value;
+      }
+    }
 
     public PdfDocument()
     {
+      password = "";
     }
 
     public PdfDocument(string uri, string password)
     {
-      this.Load(uri, password);
+      this.password = password;
+      this.Load(uri);
     }
 
-    public void Load(string uri, string password)
+    public void Load(string uri)
     {
       document = Document.NewFromFile(uri, password);
     }
@@ -41,13 +61,6 @@ namespace Papeles
         height = (int)pageHeight;
       } else {
         height = width = 0; // FIXME: throw an exception
-      }
-    }
-
-    public int NPages
-    {
-      get {
-        return document.NPages;
       }
     }
 
