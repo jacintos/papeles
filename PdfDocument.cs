@@ -1,3 +1,21 @@
+/* -*- coding: utf-8 -*- */
+/* PdfDocument.cs
+ * Copyright (c) 2009 Jacinto Shy, Jr.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
 
 using Poppler;
 
@@ -6,12 +24,34 @@ namespace Papeles
   public class PdfDocument : IDocument
   {
     Document document;
+    DocumentInfo docInfo;
     string password;
 
     public int NPages
     {
       get {
         return document.NPages;
+      }
+    }
+
+    public DocumentInfo Info
+    {
+      get {
+        if (docInfo == null) {
+          docInfo = new DocumentInfo();
+          docInfo.Title = document.Title;
+          docInfo.Format = document.Format;
+          docInfo.Author = document.Author;
+          docInfo.Subject = document.Subject;
+          docInfo.Keywords = document.Keywords;
+          docInfo.Creator = document.Creator;
+          docInfo.Producer = document.Producer;
+          docInfo.CreationDate = document.CreationDate;
+          docInfo.ModificationDate = document.ModificationDate;
+          docInfo.Linearized = document.Linearized;
+          docInfo.Metadata = document.Metadata;
+        }
+        return docInfo;
       }
     }
 
