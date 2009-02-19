@@ -44,13 +44,22 @@ namespace Papeles
       return button;
     }
 
-    public static void Main()
+    public static void Main(string[] args)
     {
+      string filePath, title;
+
       Application.Init();
 
-      IDocument doc = new PdfDocument("file:///home/jacinto/Documents/papers/inference-secco08.pdf", "");
+      if (args.Length >= 1)
+        filePath = args[0];
+      else
+        filePath = "/home/jacinto/Documents/papers/inference-secco08.pdf";
+
+      IDocument doc = new PdfDocument("file://" + filePath, "");
       DocumentInfo info = doc.Info;
-      string title = info.Title != "" ? info.Title : "Papeles";
+
+      title = info.Title != null ? info.Title
+        : System.IO.Path.GetFileName(filePath);
 
       Window myWin = new Window(title);
       myWin.DeleteEvent += delete_event;
