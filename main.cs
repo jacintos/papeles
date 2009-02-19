@@ -16,7 +16,7 @@ namespace Papeles
       this.rc = rc;
       this.doc = doc;
       doc.GetPageSize(rc.pageIndex, out width, out height);
-      this.Size(width, height);
+      this.SetSizeRequest(width, height);
     }
 
     protected override bool OnExposeEvent(Gdk.EventExpose args)
@@ -65,12 +65,12 @@ namespace Papeles
       ScrolledWindow scwin = new ScrolledWindow();
       Viewport vp = new Viewport();
 
-      RenderedDocument p1 = new RenderedDocument(new RenderContext(0, 0, 1.0), doc);
-      RenderedDocument p2 = new RenderedDocument(new RenderContext(1, 0, 1.0), doc);
-      p1.ModifyBg(StateType.Normal, new Gdk.Color(0xFF, 0xFF, 0xFF));
-      p2.ModifyBg(StateType.Normal, new Gdk.Color(0xFF, 0xFF, 0xFF));
-      vp.Add(p1);
-      //box.Add(p2);
+      for (int i = 0; i < doc.NPages; i++) {
+        RenderedDocument page = new RenderedDocument(new RenderContext(i, 0, 1.0), doc);
+
+        page.ModifyBg(StateType.Normal, new Gdk.Color(0xFF, 0xFF, 0xFF));
+        box.Add(page);
+      }
 
       vp.Add(box);
       scwin.Add(vp);
