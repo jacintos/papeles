@@ -24,7 +24,7 @@ namespace Papeles
 {
   public class PapelesMain
   {
-    static void delete_event(object obj, DeleteEventArgs args)
+    static void OnDelete(object obj, DeleteEventArgs args)
     {
       Application.Quit();
     }
@@ -40,21 +40,6 @@ namespace Papeles
 
     static void OnHelpAboutActivated(object obj, EventArgs args)
     {
-    }
-
-    static void button_callback(object obj, EventArgs args)
-    {
-      Console.WriteLine("Button was pressed");
-    }
-
-    static Button CreateButton(String text)
-    {
-      Label label = new Label();
-      Button button = new Button();
-
-      label.Text = text;
-      button.Add(label);
-      return button;
     }
 
     static UIManager CreateUIManager()
@@ -150,7 +135,7 @@ namespace Papeles
         title = info.Title;
 
       Window myWin = new Window(title);
-      myWin.DeleteEvent += delete_event;
+      myWin.DeleteEvent += OnDelete;
 
       // double pageHeight, pageWidth;
       // page.GetSize(out pageWidth, out pageHeight);
@@ -177,18 +162,6 @@ namespace Papeles
 
       paned.Add1(library);
       paned.Add2(preview);
-      /*
-      Label myLabel = new Label();
-      myLabel.Text = "Hello, world";
-
-      Button myButton = CreateButton("Press Me");
-      myButton.Clicked += button_callback;
-      /*
-      /*
-      VBox myBox = new VBox(false, 0);
-      myBox.PackStart(myLabel, false, false, 0);
-      myBox.PackStart(myButton, false, false, 0);
-      */
       /*
       Table table = new Table(2, 2, false);
       table.Attach(myLabel, 0, 1, 0, 1, AttachOptions.Fill | AttachOptions.Expand,
