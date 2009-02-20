@@ -53,10 +53,10 @@ namespace Papeles
       TreeViewColumn journalColumn = new TreeViewColumn("Journal", new CellRendererText(), "text", 2);
       TreeViewColumn yearColumn    = new TreeViewColumn("Year",    new CellRendererText(), "text", 3);
 
-      authorColumn.Clickable  = true;
-      titleColumn.Clickable   = true;
-      journalColumn.Clickable = true;
-      yearColumn.Clickable    = true;
+      authorColumn.SortColumnId = 0;
+      titleColumn.SortColumnId = 1;
+      journalColumn.SortColumnId = 2;
+      yearColumn.SortColumnId = 3;
 
       authorColumn.Expand  = true;
       titleColumn.Expand   = true;
@@ -68,12 +68,8 @@ namespace Papeles
       journalColumn.Resizable = true;
       yearColumn.Resizable    = true;
 
-      authorColumn.SortIndicator  = true;
-      // titleColumn.SortIndicator   = true;
-      // journalColumn.SortIndicator = true;
-      // yearColumn.SortIndicator    = true;
-
       tv.HeadersVisible = true;
+      tv.RulesHint = true;
       // tv.EnableGridLines = TreeViewGridLines.Vertical;
       tv.AppendColumn(authorColumn);
       tv.AppendColumn(titleColumn);
