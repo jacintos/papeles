@@ -44,6 +44,65 @@ namespace Papeles
       return button;
     }
 
+    static ScrolledWindow CreateLibraryView(ListStore store)
+    {
+      ScrolledWindow sw = new ScrolledWindow();
+      TreeView tv = new TreeView(store);
+      TreeViewColumn authorColumn  = new TreeViewColumn("Author",  new CellRendererText(), "text", 0);
+      TreeViewColumn titleColumn   = new TreeViewColumn("Title",   new CellRendererText(), "text", 1);
+      TreeViewColumn journalColumn = new TreeViewColumn("Journal", new CellRendererText(), "text", 2);
+      TreeViewColumn yearColumn    = new TreeViewColumn("Year",    new CellRendererText(), "text", 3);
+
+      authorColumn.Clickable  = true;
+      titleColumn.Clickable   = true;
+      journalColumn.Clickable = true;
+      yearColumn.Clickable    = true;
+
+      authorColumn.Expand  = true;
+      titleColumn.Expand   = true;
+      journalColumn.Expand = true;
+      //yearColumn.Expand    = true;
+
+      authorColumn.Resizable  = true;
+      titleColumn.Resizable   = true;
+      journalColumn.Resizable = true;
+      yearColumn.Resizable    = true;
+
+      authorColumn.SortIndicator  = true;
+      // titleColumn.SortIndicator   = true;
+      // journalColumn.SortIndicator = true;
+      // yearColumn.SortIndicator    = true;
+
+      tv.HeadersVisible = true;
+      // tv.EnableGridLines = TreeViewGridLines.Vertical;
+      tv.AppendColumn(authorColumn);
+      tv.AppendColumn(titleColumn);
+      tv.AppendColumn(journalColumn);
+      tv.AppendColumn(yearColumn);
+
+      sw.Add(tv);
+      return sw;
+    }
+
+    static ScrolledWindow CreatePreview(IDocument doc)
+    {
+      Box box = new VBox(true, 0);
+      ScrolledWindow scwin = new ScrolledWindow();
+      Viewport vp = new Viewport();
+
+      Gdk.Color white = new Gdk.Color(0xFF, 0xFF, 0xFF);
+      for (int i = 0; i < doc.NPages; i++) {
+        RenderedDocument page = new RenderedDocument(new RenderContext(i, 0, 1.0), doc);
+
+        page.ModifyBg(StateType.Normal, white);
+        box.Add(page);
+      }
+
+      vp.Add(box);
+      scwin.Add(vp);
+      return scwin;
+    }
+
     public static void Main(string[] args)
     {
       string filePath, title;
@@ -58,8 +117,10 @@ namespace Papeles
       IDocument doc = new PdfDocument("file://" + filePath, "");
       DocumentInfo info = doc.Info;
 
-      title = info.Title != null ? info.Title
-        : System.IO.Path.GetFileName(filePath);
+      if (info.Title == null || info.Title == "")
+        title = System.IO.Path.GetFileName(filePath);
+      else
+        title = info.Title;
 
       Window myWin = new Window(title);
       myWin.DeleteEvent += delete_event;
@@ -69,20 +130,20 @@ namespace Papeles
       // page.GetSize(out pageWidth, out pageHeight);
       myWin.SetDefaultSize(640, 480);
 
-      Box box = new VBox(true, 0);
-      ScrolledWindow scwin = new ScrolledWindow();
-      Viewport vp = new Viewport();
+      Paned paned = new VPaned();
 
-      for (int i = 0; i < doc.NPages; i++) {
-        RenderedDocument page = new RenderedDocument(new RenderContext(i, 0, 1.0), doc);
+      ListStore docStore = new ListStore(typeof(string), typeof(string),
+                                         typeof(string), typeof(string));
+      docStore.AppendValues("Jacinto Shy", "Tetrahydrobiopterin",
+                            "J Phys Chem B", "2006");
+      docStore.AppendValues("Jacinto Shy", "Nascent HDL",
+                            "Nat Struct Mol Biol", "2007");
 
-        page.ModifyBg(StateType.Normal, new Gdk.Color(0xFF, 0xFF, 0xFF));
-        box.Add(page);
-      }
+      ScrolledWindow library = CreateLibraryView(docStore);
+      ScrolledWindow preview = CreatePreview(doc);
 
-      vp.Add(box);
-      scwin.Add(vp);
-
+      paned.Add1(library);
+      paned.Add2(preview);
       /*
       Label myLabel = new Label();
       myLabel.Text = "Hello, world";
@@ -102,7 +163,7 @@ namespace Papeles
       table.Attach(myButton, 0, 2, 1, 2, AttachOptions.Fill | AttachOptions.Expand,
                    AttachOptions.Fill | AttachOptions.Expand, 0, 0);
       */
-      myWin.Add(scwin);
+      myWin.Add(paned);
       myWin.ShowAll();
 
       Application.Run();
