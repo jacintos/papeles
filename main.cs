@@ -31,6 +31,22 @@ namespace Papeles
 
     static void OnFileImportActivated(object obj, EventArgs args)
     {
+      FileChooserDialog dialog = new FileChooserDialog("Import", null, FileChooserAction.Open,
+                                                       "Cancel", ResponseType.Cancel,
+                                                       "Import", ResponseType.Accept);
+      FileFilter filter = new FileFilter();
+
+      filter.Name = "PDF and PostScript documents";
+      filter.AddMimeType("application/pdf");
+      filter.AddPattern("*.pdf");
+      filter.AddMimeType("application/postscript");
+      filter.AddPattern("*.ps");
+      dialog.AddFilter(filter);
+
+      if (dialog.Run() == (int)ResponseType.Accept) {
+        Console.WriteLine("Import paper");
+      }
+      dialog.Destroy();
     }
 
     static void OnFileQuitActivated(object obj, EventArgs args)
