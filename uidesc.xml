@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui>
+  <menubar name="MenuBar">
+    <menu action="File">
+      <menuitem action="FileImport" />
+      <menuitem action="FileQuit" />
+    </menu>
+    <menu action="Help">
+      <menuitem action="HelpAbout" />
+    </menu>
+  </menubar>
+</ui>

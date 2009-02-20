@@ -29,6 +29,19 @@ namespace Papeles
       Application.Quit();
     }
 
+    static void OnFileImportActivated(object obj, EventArgs args)
+    {
+    }
+
+    static void OnFileQuitActivated(object obj, EventArgs args)
+    {
+      Application.Quit();
+    }
+
+    static void OnHelpAboutActivated(object obj, EventArgs args)
+    {
+    }
+
     static void button_callback(object obj, EventArgs args)
     {
       Console.WriteLine("Button was pressed");
@@ -42,6 +55,24 @@ namespace Papeles
       label.Text = text;
       button.Add(label);
       return button;
+    }
+
+    static UIManager CreateUIManager()
+    {
+      UIManager uim = new UIManager();
+      ActionGroup actionGroup = new ActionGroup("Actions");
+      ActionEntry[] menu = new ActionEntry[]{
+        new ActionEntry("File", "", "_File", "", "", null),
+        new ActionEntry("FileImport", Stock.Add, "_Import", "", "", new EventHandler(OnFileImportActivated)),
+        new ActionEntry("FileQuit", Stock.Quit, "_Quit", "<control>Q", "", new EventHandler(OnFileQuitActivated)),
+        new ActionEntry("Help", "", "_Help", "", "", null),
+        new ActionEntry("HelpAbout", Stock.About, "_About", "", "", new EventHandler(OnHelpAboutActivated)),
+      };
+
+      actionGroup.Add(menu);
+      uim.InsertActionGroup(actionGroup, 0);
+      uim.AddUiFromFile("uidesc.xml");
+      return uim;
     }
 
     static ScrolledWindow CreateLibraryView(ListStore store)
@@ -70,7 +101,7 @@ namespace Papeles
 
       tv.HeadersVisible = true;
       tv.RulesHint = true;
-      // tv.EnableGridLines = TreeViewGridLines.Vertical;
+      tv.EnableGridLines = TreeViewGridLines.Vertical;
       tv.AppendColumn(authorColumn);
       tv.AppendColumn(titleColumn);
       tv.AppendColumn(journalColumn);
@@ -121,10 +152,16 @@ namespace Papeles
       Window myWin = new Window(title);
       myWin.DeleteEvent += delete_event;
 
-
       // double pageHeight, pageWidth;
       // page.GetSize(out pageWidth, out pageHeight);
       myWin.SetDefaultSize(640, 480);
+
+      UIManager manager = CreateUIManager();
+      myWin.AddAccelGroup(manager.AccelGroup);
+
+      Box winBox = new VBox(false, 0);
+
+      MenuBar menu = (MenuBar)manager.GetWidget("/MenuBar");
 
       Paned paned = new VPaned();
 
@@ -159,7 +196,11 @@ namespace Papeles
       table.Attach(myButton, 0, 2, 1, 2, AttachOptions.Fill | AttachOptions.Expand,
                    AttachOptions.Fill | AttachOptions.Expand, 0, 0);
       */
-      myWin.Add(paned);
+
+      winBox.PackStart(menu, false, false, 0);
+      winBox.PackStart(paned, true, true, 0);
+
+      myWin.Add(winBox);
       myWin.ShowAll();
 
       Application.Run();
