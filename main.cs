@@ -40,6 +40,13 @@ namespace Papeles
 
     static void OnHelpAboutActivated(object obj, EventArgs args)
     {
+      AboutDialog dialog = new AboutDialog();
+
+      dialog.ProgramName = "Papeles";
+      dialog.Version = "0.1";
+      dialog.Copyright = "Copyright \u00a9 2009 Jacinto Shy, Jr.";
+      dialog.Run(); // TODO: don't block
+      dialog.Destroy();
     }
 
     static UIManager CreateUIManager()
