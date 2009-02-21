@@ -22,83 +22,42 @@ using Gtk;
 
 namespace Papeles
 {
-  public class PapelesMain
+  public class PapelesApp
   {
-    static void OnDelete(object obj, DeleteEventArgs args)
-    {
-      Application.Quit();
-    }
+    // static UIManager CreateUIManager()
+    // {
+    //   UIManager uim = new UIManager();
+    //   ActionGroup actionGroup = new ActionGroup("Actions");
+    //   ActionEntry[] menuActions = new ActionEntry[]{
+    //     new ActionEntry("File", "", "_File", "", "", null),
+    //     new ActionEntry("FileImport", Stock.Add, "_Import", "", "", new EventHandler(OnFileImportActivated)),
+    //     new ActionEntry("FileQuit", Stock.Quit, "_Quit", "<control>Q", "", new EventHandler(OnFileQuitActivated)),
+    //     new ActionEntry("Help", "", "_Help", "", "", null),
+    //     new ActionEntry("HelpAbout", Stock.About, "_About", "", "", new EventHandler(OnHelpAboutActivated)),
+    //   };
+    //   ActionEntry[] mainToolbarActions = new ActionEntry[]{
+    //     new ActionEntry("MainToolbarPrint", Stock.Print, "Print", "<control>P", "Print", null),
+    //     new ActionEntry("MainToolbarPageUp", Stock.GoUp, "", "", "Previous page", null),
+    //     new ActionEntry("MainToolbarPageDown", Stock.GoDown, "", "", "Next page", null)
+    //   };
+    //   ToolItem scaleItem = new ToolItem();
+    //   Scale scale = new HScale(1.0, 5.0, 0.1);
+    //   Gtk.Action pageScaleAction = new Gtk.Action("MainToolbarPageScale", "", "Scale", "");
 
-    static void OnFileImportActivated(object obj, EventArgs args)
-    {
-      FileChooserDialog dialog = new FileChooserDialog("Import", null, FileChooserAction.Open,
-                                                       "Cancel", ResponseType.Cancel,
-                                                       "Import", ResponseType.Accept);
-      FileFilter filter = new FileFilter();
+    //   // Seems we can't use custom widgets for a toolitem created in the UI description.
+    //   scale.DrawValue = false;
+    //   scale.SetSizeRequest(100, -1);
+    //   scaleItem.Add(scale);
+    //   pageScaleAction.ConnectProxy(scaleItem);
 
-      filter.Name = "PDF and PostScript documents";
-      filter.AddMimeType("application/pdf");
-      filter.AddPattern("*.pdf");
-      filter.AddMimeType("application/postscript");
-      filter.AddPattern("*.ps");
-      dialog.AddFilter(filter);
+    //   actionGroup.Add(pageScaleAction);
+    //   actionGroup.Add(menuActions);
+    //   actionGroup.Add(mainToolbarActions);
 
-      if (dialog.Run() == (int)ResponseType.Accept) {
-        Console.WriteLine("Import paper");
-      }
-      dialog.Destroy();
-    }
-
-    static void OnFileQuitActivated(object obj, EventArgs args)
-    {
-      Application.Quit();
-    }
-
-    static void OnHelpAboutActivated(object obj, EventArgs args)
-    {
-      AboutDialog dialog = new AboutDialog();
-
-      dialog.ProgramName = "Papeles";
-      dialog.Version = "0.1";
-      dialog.Copyright = "Copyright \u00a9 2009 Jacinto Shy, Jr.";
-      dialog.Run(); // TODO: don't block
-      dialog.Destroy();
-    }
-
-    static UIManager CreateUIManager()
-    {
-      UIManager uim = new UIManager();
-      ActionGroup actionGroup = new ActionGroup("Actions");
-      ActionEntry[] menuActions = new ActionEntry[]{
-        new ActionEntry("File", "", "_File", "", "", null),
-        new ActionEntry("FileImport", Stock.Add, "_Import", "", "", new EventHandler(OnFileImportActivated)),
-        new ActionEntry("FileQuit", Stock.Quit, "_Quit", "<control>Q", "", new EventHandler(OnFileQuitActivated)),
-        new ActionEntry("Help", "", "_Help", "", "", null),
-        new ActionEntry("HelpAbout", Stock.About, "_About", "", "", new EventHandler(OnHelpAboutActivated)),
-      };
-      ActionEntry[] mainToolbarActions = new ActionEntry[]{
-        new ActionEntry("MainToolbarPrint", Stock.Print, "Print", "<control>P", "Print", null),
-        new ActionEntry("MainToolbarPageUp", Stock.GoUp, "", "", "Previous page", null),
-        new ActionEntry("MainToolbarPageDown", Stock.GoDown, "", "", "Next page", null)
-      };
-      ToolItem scaleItem = new ToolItem();
-      Scale scale = new HScale(1.0, 5.0, 0.1);
-      Gtk.Action pageScaleAction = new Gtk.Action("MainToolbarPageScale", "", "Scale", "");
-
-      // Seems we can't use custom widgets for a toolitem created in the UI description.
-      scale.DrawValue = false;
-      scale.SetSizeRequest(100, -1);
-      scaleItem.Add(scale);
-      pageScaleAction.ConnectProxy(scaleItem);
-
-      actionGroup.Add(pageScaleAction);
-      actionGroup.Add(menuActions);
-      actionGroup.Add(mainToolbarActions);
-
-      uim.InsertActionGroup(actionGroup, 0);
-      uim.AddUiFromFile("uidesc.xml");
-      return uim;
-    }
+    //   uim.InsertActionGroup(actionGroup, 0);
+    //   uim.AddUiFromFile("uidesc.xml");
+    //   return uim;
+    // }
 
     static ScrolledWindow CreateLibraryView(ListStore store)
     {
@@ -157,68 +116,74 @@ namespace Papeles
 
     public static void Main(string[] args)
     {
-      string filePath, title;
+      new PapelesApp();
 
+      // string filePath, title;
+      // if (args.Length >= 1)
+      //   filePath = args[0];
+      // else
+      //   filePath = "/home/jacinto/Documents/papers/inference-secco08.pdf";
+
+      // IDocument doc = new PdfDocument("file://" + filePath, "");
+      // DocumentInfo info = doc.Info;
+
+      // if (info.Title == null || info.Title == "")
+      //   title = System.IO.Path.GetFileName(filePath);
+      // else
+      //   title = info.Title;
+
+      // Window myWin = new Window(title);
+      // myWin.DeleteEvent += OnDelete;
+
+      // // double pageHeight, pageWidth;
+      // // page.GetSize(out pageWidth, out pageHeight);
+      // myWin.SetDefaultSize(640, 480);
+
+      // UIManager uim = CreateUIManager();
+      // myWin.AddAccelGroup(uim.AccelGroup);
+
+      // Box winBox = new VBox(false, 0);
+
+      // MenuBar menu = (MenuBar)uim.GetWidget("/MenuBar");
+
+      // Paned paned = new VPaned();
+
+      // ListStore docStore = new ListStore(typeof(string), typeof(string),
+      //                                    typeof(string), typeof(string));
+      // docStore.AppendValues("Jacinto Shy", "Tetrahydrobiopterin",
+      //                       "J Phys Chem B", "2006");
+      // docStore.AppendValues("Jacinto Shy", "Nascent HDL",
+      //                       "Nat Struct Mol Biol", "2007");
+
+      // ScrolledWindow library = CreateLibraryView(docStore);
+      // ScrolledWindow preview = CreatePreview(doc);
+
+      // paned.Add1(library);
+      // paned.Add2(preview);
+
+      // Toolbar mainToolbar = (Toolbar)uim.GetWidget("/MainToolbar");
+
+      // /*
+      // Table table = new Table(2, 2, false);
+      // table.Attach(myLabel, 0, 1, 0, 1, AttachOptions.Fill | AttachOptions.Expand,
+      //              AttachOptions.Fill | AttachOptions.Expand, 0, 0);
+      // table.Attach(myButton, 0, 2, 1, 2, AttachOptions.Fill | AttachOptions.Expand,
+      //              AttachOptions.Fill | AttachOptions.Expand, 0, 0);
+      // */
+
+      // winBox.PackStart(menu, false, false, 0);
+      // winBox.PackStart(paned, true, true, 0);
+      // winBox.PackStart(mainToolbar, false, false, 0);
+
+      // myWin.Add(winBox);
+      // myWin.ShowAll();
+    }
+
+    public PapelesApp()
+    {
       Application.Init();
 
-      if (args.Length >= 1)
-        filePath = args[0];
-      else
-        filePath = "/home/jacinto/Documents/papers/inference-secco08.pdf";
-
-      IDocument doc = new PdfDocument("file://" + filePath, "");
-      DocumentInfo info = doc.Info;
-
-      if (info.Title == null || info.Title == "")
-        title = System.IO.Path.GetFileName(filePath);
-      else
-        title = info.Title;
-
-      Window myWin = new Window(title);
-      myWin.DeleteEvent += OnDelete;
-
-      // double pageHeight, pageWidth;
-      // page.GetSize(out pageWidth, out pageHeight);
-      myWin.SetDefaultSize(640, 480);
-
-      UIManager uim = CreateUIManager();
-      myWin.AddAccelGroup(uim.AccelGroup);
-
-      Box winBox = new VBox(false, 0);
-
-      MenuBar menu = (MenuBar)uim.GetWidget("/MenuBar");
-
-      Paned paned = new VPaned();
-
-      ListStore docStore = new ListStore(typeof(string), typeof(string),
-                                         typeof(string), typeof(string));
-      docStore.AppendValues("Jacinto Shy", "Tetrahydrobiopterin",
-                            "J Phys Chem B", "2006");
-      docStore.AppendValues("Jacinto Shy", "Nascent HDL",
-                            "Nat Struct Mol Biol", "2007");
-
-      ScrolledWindow library = CreateLibraryView(docStore);
-      ScrolledWindow preview = CreatePreview(doc);
-
-      paned.Add1(library);
-      paned.Add2(preview);
-
-      Toolbar mainToolbar = (Toolbar)uim.GetWidget("/MainToolbar");
-
-      /*
-      Table table = new Table(2, 2, false);
-      table.Attach(myLabel, 0, 1, 0, 1, AttachOptions.Fill | AttachOptions.Expand,
-                   AttachOptions.Fill | AttachOptions.Expand, 0, 0);
-      table.Attach(myButton, 0, 2, 1, 2, AttachOptions.Fill | AttachOptions.Expand,
-                   AttachOptions.Fill | AttachOptions.Expand, 0, 0);
-      */
-
-      winBox.PackStart(menu, false, false, 0);
-      winBox.PackStart(paned, true, true, 0);
-      winBox.PackStart(mainToolbar, false, false, 0);
-
-      myWin.Add(winBox);
-      myWin.ShowAll();
+      new MainWindow();
 
       Application.Run();
     }
