@@ -69,15 +69,32 @@ namespace Papeles
     {
       UIManager uim = new UIManager();
       ActionGroup actionGroup = new ActionGroup("Actions");
-      ActionEntry[] menu = new ActionEntry[]{
+      ActionEntry[] menuActions = new ActionEntry[]{
         new ActionEntry("File", "", "_File", "", "", null),
         new ActionEntry("FileImport", Stock.Add, "_Import", "", "", new EventHandler(OnFileImportActivated)),
         new ActionEntry("FileQuit", Stock.Quit, "_Quit", "<control>Q", "", new EventHandler(OnFileQuitActivated)),
         new ActionEntry("Help", "", "_Help", "", "", null),
         new ActionEntry("HelpAbout", Stock.About, "_About", "", "", new EventHandler(OnHelpAboutActivated)),
       };
+      ActionEntry[] mainToolbarActions = new ActionEntry[]{
+        new ActionEntry("MainToolbarPrint", Stock.Print, "Print", "<control>P", "Print", null),
+        new ActionEntry("MainToolbarPageUp", Stock.GoUp, "", "", "Previous page", null),
+        new ActionEntry("MainToolbarPageDown", Stock.GoDown, "", "", "Next page", null)
+      };
+      ToolItem scaleItem = new ToolItem();
+      Scale scale = new HScale(1.0, 5.0, 0.1);
+      Gtk.Action pageScaleAction = new Gtk.Action("MainToolbarPageScale", "", "Scale", "");
 
-      actionGroup.Add(menu);
+      // Seems we can't use custom widgets for a toolitem created in the UI description.
+      scale.DrawValue = false;
+      scale.SetSizeRequest(100, -1);
+      scaleItem.Add(scale);
+      pageScaleAction.ConnectProxy(scaleItem);
+
+      actionGroup.Add(pageScaleAction);
+      actionGroup.Add(menuActions);
+      actionGroup.Add(mainToolbarActions);
+
       uim.InsertActionGroup(actionGroup, 0);
       uim.AddUiFromFile("uidesc.xml");
       return uim;
@@ -138,36 +155,6 @@ namespace Papeles
       return scwin;
     }
 
-    static Toolbar CreateMainToolbar()
-    {
-      Toolbar toolbar = new Toolbar();
-      ToolButton printButton = new ToolButton(Stock.Print);
-      ToolButton upButton = new ToolButton(Stock.GoUp);
-      ToolButton downButton = new ToolButton(Stock.GoDown);
-      SeparatorToolItem lineSep = new SeparatorToolItem();
-      SeparatorToolItem space = new SeparatorToolItem();
-      ToolItem scaleItem = new ToolItem();
-      Scale scale = new HScale(1.0, 5.0, 0.1);
-
-      lineSep.Draw = true;
-      space.Draw = false;
-
-      toolbar.Insert(printButton, 0);
-
-      toolbar.Insert(lineSep, 1);
-
-      toolbar.Insert(upButton, 2);
-      toolbar.Insert(downButton, 3);
-
-      toolbar.Insert(space, 4);
-
-      scale.DrawValue = false;
-      scale.SetSizeRequest(100, -1);
-      scaleItem.Add(scale);
-      toolbar.Insert(scaleItem, 5);
-      return toolbar;
-    }
-
     public static void Main(string[] args)
     {
       string filePath, title;
@@ -194,12 +181,12 @@ namespace Papeles
       // page.GetSize(out pageWidth, out pageHeight);
       myWin.SetDefaultSize(640, 480);
 
-      UIManager manager = CreateUIManager();
-      myWin.AddAccelGroup(manager.AccelGroup);
+      UIManager uim = CreateUIManager();
+      myWin.AddAccelGroup(uim.AccelGroup);
 
       Box winBox = new VBox(false, 0);
 
-      MenuBar menu = (MenuBar)manager.GetWidget("/MenuBar");
+      MenuBar menu = (MenuBar)uim.GetWidget("/MenuBar");
 
       Paned paned = new VPaned();
 
@@ -216,7 +203,7 @@ namespace Papeles
       paned.Add1(library);
       paned.Add2(preview);
 
-      Toolbar mainToolbar = CreateMainToolbar();
+      Toolbar mainToolbar = (Toolbar)uim.GetWidget("/MainToolbar");
 
       /*
       Table table = new Table(2, 2, false);

@@ -9,4 +9,12 @@
       <menuitem action="HelpAbout" />
     </menu>
   </menubar>
+  <toolbar name="MainToolbar">
+    <toolitem action="MainToolbarPrint" />
+    <separator />
+    <toolitem action="MainToolbarPageUp" />
+    <toolitem action="MainToolbarPageDown" />
+    <separator />
+    <toolitem action="MainToolbarPageScale" />
+  </toolbar>
 </ui>
