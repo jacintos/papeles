@@ -138,6 +138,36 @@ namespace Papeles
       return scwin;
     }
 
+    static Toolbar CreateMainToolbar()
+    {
+      Toolbar toolbar = new Toolbar();
+      ToolButton printButton = new ToolButton(Stock.Print);
+      ToolButton upButton = new ToolButton(Stock.GoUp);
+      ToolButton downButton = new ToolButton(Stock.GoDown);
+      SeparatorToolItem lineSep = new SeparatorToolItem();
+      SeparatorToolItem space = new SeparatorToolItem();
+      ToolItem scaleItem = new ToolItem();
+      Scale scale = new HScale(1.0, 5.0, 0.1);
+
+      lineSep.Draw = true;
+      space.Draw = false;
+
+      toolbar.Insert(printButton, 0);
+
+      toolbar.Insert(lineSep, 1);
+
+      toolbar.Insert(upButton, 2);
+      toolbar.Insert(downButton, 3);
+
+      toolbar.Insert(space, 4);
+
+      scale.DrawValue = false;
+      scale.SetSizeRequest(100, -1);
+      scaleItem.Add(scale);
+      toolbar.Insert(scaleItem, 5);
+      return toolbar;
+    }
+
     public static void Main(string[] args)
     {
       string filePath, title;
@@ -185,6 +215,9 @@ namespace Papeles
 
       paned.Add1(library);
       paned.Add2(preview);
+
+      Toolbar mainToolbar = CreateMainToolbar();
+
       /*
       Table table = new Table(2, 2, false);
       table.Attach(myLabel, 0, 1, 0, 1, AttachOptions.Fill | AttachOptions.Expand,
@@ -195,6 +228,7 @@ namespace Papeles
 
       winBox.PackStart(menu, false, false, 0);
       winBox.PackStart(paned, true, true, 0);
+      winBox.PackStart(mainToolbar, false, false, 0);
 
       myWin.Add(winBox);
       myWin.ShowAll();
