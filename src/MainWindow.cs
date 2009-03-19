@@ -163,6 +163,7 @@ namespace Papeles
 
       gxml.Autoconnect(this);
 
+      Database db = new Database();
       
       ListStore docStore = new ListStore(typeof(string), typeof(string),
                                          typeof(string), typeof(string));

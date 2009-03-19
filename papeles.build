@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Papeles" default="all">
+  <property name="debug" value="true"/>
+  <target name="all"/>
+
+  <target name="clean" description="Remove built files">
+    <delete dir="build" if="${directory::exists('build')}"/>
+  </target>
+
+  <target name="init">
+    <mkdir dir="build"/>
+  </target>
+
+  <target name="compile" depends="init" description="Compile library">
+    <csc target="exe" output="build/${project::get-name()}.exe" debug="${debug}">
+      <sources>
+        <include name="src/*.cs"/>
+      </sources>
+
+      <pkg-references>
+        <package name="gtk-sharp-2.0"/>
+        <package name="glade-sharp-2.0"/>
+      </pkg-references>
+
+      <references>
+        <include name="lib/poppler-sharp.dll"/>
+        <include name="Mono.Cairo.dll"/>
+        <include name="Mono.Data.Sqlite.dll"/>
+        <include name="System.Data.dll"/>
+      </references>
+
+      <resources>
+        <include name="src/*.glade"/>
+      </resources>
+    </csc>
+    <copy todir="build" flatten="true">
+      <fileset basedir="lib">
+        <include name="*.dll"/>
+      </fileset>
+    </copy>
+  </target>
+</project>
