@@ -23,162 +23,179 @@ using System;
 
 namespace Papeles
 {
-  class MainWindow
-  {
-    [Widget] Window main_window;
-    [Widget] Viewport document_viewport;
-    [Widget] TreeView document_treeview;
-    [Widget] HScale toolbar_scale_page;
-    [Widget] Statusbar statusbar;
-
-    public void OnDelete(object obj, DeleteEventArgs args)
-    {
-      Application.Quit();
+    enum Column {
+        Authors = 0,
+        Title = 1,
+        Journal = 2,
+        Year = 3
     }
 
-    public void OnFileImportActivated(object obj, EventArgs args)
+    class MainWindow
     {
-      FileChooserDialog dialog = new FileChooserDialog("Import", null, FileChooserAction.Open,
-                                                       "Cancel", ResponseType.Cancel,
-                                                       "Import", ResponseType.Accept);
-      FileFilter filter = new FileFilter();
+        [Widget] Window main_window;
+        [Widget] Viewport document_viewport;
+        [Widget] Toolbar main_toolbar;
+        [Widget] TreeView document_treeview;
+        [Widget] HScale toolbar_scale_page;
+        [Widget] Statusbar statusbar;
 
-      filter.Name = "PDF and PostScript documents";
-      filter.AddMimeType("application/pdf");
-      filter.AddPattern("*.pdf");
-      filter.AddMimeType("application/postscript");
-      filter.AddPattern("*.ps");
-      dialog.AddFilter(filter);
+        public void OnDelete(object obj, DeleteEventArgs args)
+        {
+            Application.Quit();
+        }
 
-      if (dialog.Run() == (int)ResponseType.Accept) {
-        Console.WriteLine("Import paper");
-      }
-      dialog.Destroy();
-    }
+        public void OnFileImportActivated(object obj, EventArgs args)
+        {
+            FileChooserDialog dialog = new FileChooserDialog("Import", null, FileChooserAction.Open,
+                                                             "Cancel", ResponseType.Cancel,
+                                                             "Import", ResponseType.Accept);
+            FileFilter filter = new FileFilter();
 
-    public void OnFileQuitActivated(object obj, EventArgs args)
-    {
-      Application.Quit();
-    }
+            filter.Name = "PDF and PostScript documents";
+            filter.AddMimeType("application/pdf");
+            filter.AddPattern("*.pdf");
+            filter.AddMimeType("application/postscript");
+            filter.AddPattern("*.ps");
+            dialog.AddFilter(filter);
 
-    public void OnHelpAboutActivated(object obj, EventArgs args)
-    {
-      AboutDialog dialog = new AboutDialog();
+            if (dialog.Run() == (int)ResponseType.Accept) {
+                Console.WriteLine("Import paper");
+            }
+            dialog.Destroy();
+        }
 
-      dialog.ProgramName = "Papeles";
-      dialog.Version = "0.1";
-      dialog.Copyright = "Copyright \u00a9 2009 Jacinto Shy, Jr.";
-      dialog.Run(); // TODO: don't block
-      dialog.Destroy();
-    }
+        public void OnFileQuitActivated(object obj, EventArgs args)
+        {
+            Application.Quit();
+        }
 
-    public void OnPrintClicked(object obj, EventArgs args)
-    {
-    }
+        public void OnHelpAboutActivated(object obj, EventArgs args)
+        {
+            AboutDialog dialog = new AboutDialog();
 
-    public void OnPrevPageClicked(object obj, EventArgs args)
-    {
-    }
+            dialog.ProgramName = "Papeles";
+            dialog.Version = "0.1";
+            dialog.Copyright = "Copyright \u00a9 2009 Jacinto Shy, Jr.";
+            dialog.Run(); // TODO: don't block
+            dialog.Destroy();
+        }
 
-    public void OnNextPageClicked(object obj, EventArgs args)
-    {
-    }
+        public void OnPrintClicked(object obj, EventArgs args)
+        {
+        }
 
-    public void OnZoomOutClicked(object obj, EventArgs args)
-    {
-      Adjustment adj = toolbar_scale_page.Adjustment;
+        public void OnPrevPageClicked(object obj, EventArgs args)
+        {
+        }
 
-      if (toolbar_scale_page.Value - adj.PageIncrement >= adj.Lower)
-        toolbar_scale_page.Value -= adj.PageIncrement;
-    }
+        public void OnNextPageClicked(object obj, EventArgs args)
+        {
+        }
 
-    public void OnZoomInClicked(object obj, EventArgs args)
-    {
-      Adjustment adj = toolbar_scale_page.Adjustment;
+        public void OnZoomOutClicked(object obj, EventArgs args)
+        {
+            Adjustment adj = toolbar_scale_page.Adjustment;
 
-      if (toolbar_scale_page.Value + adj.PageIncrement <= adj.Upper)
-        toolbar_scale_page.Value += adj.PageIncrement;
-    }
+            if (toolbar_scale_page.Value - adj.PageIncrement >= adj.Lower)
+                toolbar_scale_page.Value -= adj.PageIncrement;
+        }
 
-    public void OnScalePageValueChanged(object obj, EventArgs args)
-    {
-      // toolbar_scale_page.Value
-    }
+        public void OnZoomInClicked(object obj, EventArgs args)
+        {
+            Adjustment adj = toolbar_scale_page.Adjustment;
 
-    void CreateLibraryView(ListStore store)
-    {
-      TreeViewColumn authorColumn  = new TreeViewColumn("Author",  new CellRendererText(), "text", 0);
-      TreeViewColumn titleColumn   = new TreeViewColumn("Title",   new CellRendererText(), "text", 1);
-      TreeViewColumn journalColumn = new TreeViewColumn("Journal", new CellRendererText(), "text", 2);
-      TreeViewColumn yearColumn    = new TreeViewColumn("Year",    new CellRendererText(), "text", 3);
+            if (toolbar_scale_page.Value + adj.PageIncrement <= adj.Upper)
+                toolbar_scale_page.Value += adj.PageIncrement;
+        }
 
-      authorColumn.SortColumnId = 0;
-      titleColumn.SortColumnId = 1;
-      journalColumn.SortColumnId = 2;
-      yearColumn.SortColumnId = 3;
+        public void OnScalePageValueChanged(object obj, EventArgs args)
+        {
+            // toolbar_scale_page.Value
+        }
 
-      authorColumn.Expand  = true;
-      titleColumn.Expand   = true;
-      journalColumn.Expand = true;
-      //yearColumn.Expand    = true;
+        /// <summary>
+        /// Populate headers in treeview for library.
+        /// </summary>
+        void CreateLibraryView(ListStore store)
+        {
+            TreeViewColumn authorsColumn = new TreeViewColumn("Authors", new CellRendererText(),
+                                                              "text",    Column.Authors);
+            TreeViewColumn titleColumn   = new TreeViewColumn("Title",   new CellRendererText(),
+                                                              "text",    Column.Title);
+            TreeViewColumn journalColumn = new TreeViewColumn("Journal", new CellRendererText(),
+                                                              "text",    Column.Journal);
+            TreeViewColumn yearColumn    = new TreeViewColumn("Year",    new CellRendererText(),
+                                                              "text",    Column.Year);
 
-      authorColumn.Resizable  = true;
-      titleColumn.Resizable   = true;
-      journalColumn.Resizable = true;
-      yearColumn.Resizable    = true;
+            authorsColumn.SortColumnId = (int) Column.Authors;
+            titleColumn.SortColumnId   = (int) Column.Title;
+            journalColumn.SortColumnId = (int) Column.Journal;
+            yearColumn.SortColumnId    = (int) Column.Year;
 
-      document_treeview.AppendColumn(authorColumn);
-      document_treeview.AppendColumn(titleColumn);
-      document_treeview.AppendColumn(journalColumn);
-      document_treeview.AppendColumn(yearColumn);
-      document_treeview.Model = store;
-    }
+            authorsColumn.Expand = true;
+            titleColumn.Expand   = true;
+            journalColumn.Expand = true;
+            yearColumn.Expand    = true;
 
-    void DisplayDocument(string filePath)
-    {
-      IDocument doc = new PdfDocument("file://" + filePath, "");
-      DocumentInfo info = doc.Info;
+            authorsColumn.Resizable = true;
+            titleColumn.Resizable   = true;
+            journalColumn.Resizable = true;
+            yearColumn.Resizable    = true;
 
-      if (info.Title == null || info.Title == "")
-        main_window.Title = System.IO.Path.GetFileName(filePath);
-      else
-        main_window.Title = info.Title;
+            document_treeview.AppendColumn(authorsColumn);
+            document_treeview.AppendColumn(titleColumn);
+            document_treeview.AppendColumn(journalColumn);
+            document_treeview.AppendColumn(yearColumn);
+            document_treeview.Model = store;
+        }
 
-      Box box = new VBox(true, 0);
+        void DisplayDocument(string filePath)
+        {
+            IDocument doc = new PdfDocument("file://" + filePath, "");
+            DocumentInfo info = doc.Info;
 
-      Gdk.Color white = new Gdk.Color(0xFF, 0xFF, 0xFF);
-      for (int i = 0; i < doc.NPages; i++) {
-        RenderedDocument page = new RenderedDocument(new RenderContext(i, 0, 1.0), doc);
+            if (info.Title == null || info.Title == "")
+                main_window.Title = System.IO.Path.GetFileName(filePath);
+            else
+                main_window.Title = info.Title;
 
-        page.ModifyBg(StateType.Normal, white);
-        box.Add(page);
-      }
+            Box box = new VBox(true, 0);
 
-      document_viewport.Add(box);
-    }
+            Gdk.Color white = new Gdk.Color(0xFF, 0xFF, 0xFF);
+            for (int i = 0; i < doc.NPages; i++) {
+                RenderedDocument page = new RenderedDocument(new RenderContext(i, 0, 1.0), doc);
 
-    public MainWindow()
-    {
-      Glade.XML gxml = new Glade.XML(null, "papeles.glade", "main_window", null);
+                page.ModifyBg(StateType.Normal, white);
+                box.Add(page);
+            }
 
-      gxml.Autoconnect(this);
+            document_viewport.Add(box);
+        }
 
-      Database db = new Database();
+        public MainWindow()
+        {
+            Glade.XML gxml = new Glade.XML(null, "papeles.glade", "main_window", null);
+
+            gxml.Autoconnect(this);
+
+            Database db = new Database();
       
-      ListStore docStore = new ListStore(typeof(string), typeof(string),
-                                         typeof(string), typeof(string));
-      docStore.AppendValues("Jacinto Shy", "Tetrahydrobiopterin",
-                            "J Phys Chem B", "2006");
-      docStore.AppendValues("Jacinto Shy", "Nascent HDL",
-                            "Nat Struct Mol Biol", "2007");
-      this.CreateLibraryView(docStore);
+            ListStore docStore = new ListStore(typeof(string), typeof(string),
+                                               typeof(string), typeof(string));
+            /*docStore.AppendValues("Jacinto Shy", "Tetrahydrobiopterin",
+                                  "J Phys Chem B", "2006");
+            docStore.AppendValues("Jacinto Shy", "Nascent HDL",
+            "Nat Struct Mol Biol", "2007");
+            this.CreateLibraryView(docStore);*/
 
-      this.DisplayDocument("/home/jacinto/Documents/papers/inference-secco08.pdf");
+            //this.DisplayDocument("/home/jacinto/Documents/papers/inference-secco08.pdf");
 
-      uint totalPapers = 2;
-      statusbar.Push(1, String.Format("{0} papers", totalPapers));
+            uint totalPapers = 2;
+            statusbar.Push(1, String.Format("{0} papers", totalPapers));
 
-      main_window.ShowAll();
+            main_toolbar.IconSize = IconSize.SmallToolbar;
+
+            main_window.ShowAll();
+        }
     }
-  }
 }
