@@ -18,106 +18,35 @@
  */
 
 using Gtk;
-using Glade;
 using System;
 
 namespace Papeles
 {
     enum Column {
-        Authors = 0,
-        Title = 1,
-        Journal = 2,
-        Year = 3
+        // Flag = 0,
+        Authors,
+        Title,
+        Journal,
+        Year,
+        Rating
     }
 
     class MainWindow
     {
-        [Widget] Window main_window;
-        [Widget] Viewport document_viewport;
-        [Widget] Toolbar main_toolbar;
-        [Widget] TreeView document_treeview;
-        [Widget] HScale toolbar_scale_page;
-        [Widget] Statusbar statusbar;
-
-        public void OnDelete(object obj, DeleteEventArgs args)
-        {
-            Application.Quit();
-        }
-
-        public void OnFileImportActivated(object obj, EventArgs args)
-        {
-            FileChooserDialog dialog = new FileChooserDialog("Import", null, FileChooserAction.Open,
-                                                             "Cancel", ResponseType.Cancel,
-                                                             "Import", ResponseType.Accept);
-            FileFilter filter = new FileFilter();
-
-            filter.Name = "PDF and PostScript documents";
-            filter.AddMimeType("application/pdf");
-            filter.AddPattern("*.pdf");
-            filter.AddMimeType("application/postscript");
-            filter.AddPattern("*.ps");
-            dialog.AddFilter(filter);
-
-            if (dialog.Run() == (int)ResponseType.Accept) {
-                Console.WriteLine("Import paper");
-            }
-            dialog.Destroy();
-        }
-
-        public void OnFileQuitActivated(object obj, EventArgs args)
-        {
-            Application.Quit();
-        }
-
-        public void OnHelpAboutActivated(object obj, EventArgs args)
-        {
-            AboutDialog dialog = new AboutDialog();
-
-            dialog.ProgramName = "Papeles";
-            dialog.Version = "0.1";
-            dialog.Copyright = "Copyright \u00a9 2009 Jacinto Shy, Jr.";
-            dialog.Run(); // TODO: don't block
-            dialog.Destroy();
-        }
-
-        public void OnPrintClicked(object obj, EventArgs args)
-        {
-        }
-
-        public void OnPrevPageClicked(object obj, EventArgs args)
-        {
-        }
-
-        public void OnNextPageClicked(object obj, EventArgs args)
-        {
-        }
-
-        public void OnZoomOutClicked(object obj, EventArgs args)
-        {
-            Adjustment adj = toolbar_scale_page.Adjustment;
-
-            if (toolbar_scale_page.Value - adj.PageIncrement >= adj.Lower)
-                toolbar_scale_page.Value -= adj.PageIncrement;
-        }
-
-        public void OnZoomInClicked(object obj, EventArgs args)
-        {
-            Adjustment adj = toolbar_scale_page.Adjustment;
-
-            if (toolbar_scale_page.Value + adj.PageIncrement <= adj.Upper)
-                toolbar_scale_page.Value += adj.PageIncrement;
-        }
-
-        public void OnScalePageValueChanged(object obj, EventArgs args)
-        {
-            // toolbar_scale_page.Value
-        }
+        [Glade.Widget] Window main_window;
+        [Glade.Widget] Viewport document_viewport;
+        [Glade.Widget] Toolbar main_toolbar;
+        [Glade.Widget] TreeView document_treeview;
+        [Glade.Widget] HScale toolbar_scale_page;
+        [Glade.Widget] Statusbar statusbar;
 
         /// <summary>
         /// Populate headers in treeview for library.
         /// </summary>
         void CreateLibraryView(ListStore store)
         {
+            // TreeViewColumn flagColumn    = new TreeViewColumn("Flag",    new CellRendererText(),
+            //                                                   "text",    Column.Flag);
             TreeViewColumn authorsColumn = new TreeViewColumn("Authors", new CellRendererText(),
                                                               "text",    Column.Authors);
             TreeViewColumn titleColumn   = new TreeViewColumn("Title",   new CellRendererText(),
@@ -126,26 +55,34 @@ namespace Papeles
                                                               "text",    Column.Journal);
             TreeViewColumn yearColumn    = new TreeViewColumn("Year",    new CellRendererText(),
                                                               "text",    Column.Year);
+            // TreeViewColumn ratingColumn  = new TreeViewColumn("Rating",  new CellRendererText(),
+            //                                                   "text",    Column.Rating);
 
             authorsColumn.SortColumnId = (int) Column.Authors;
             titleColumn.SortColumnId   = (int) Column.Title;
             journalColumn.SortColumnId = (int) Column.Journal;
             yearColumn.SortColumnId    = (int) Column.Year;
+            // ratingColumn.SortColumnId  = (int) Column.Rating;
 
             authorsColumn.Expand = true;
             titleColumn.Expand   = true;
             journalColumn.Expand = true;
             yearColumn.Expand    = true;
+            // ratingColumn.Expand  = true;
 
             authorsColumn.Resizable = true;
             titleColumn.Resizable   = true;
             journalColumn.Resizable = true;
             yearColumn.Resizable    = true;
 
+            // document_treeview.AppendColumn(flagColumn);
             document_treeview.AppendColumn(authorsColumn);
             document_treeview.AppendColumn(titleColumn);
             document_treeview.AppendColumn(journalColumn);
             document_treeview.AppendColumn(yearColumn);
+            // document_treeview.AppendColumn(ratingColumn);
+
+            document_treeview.Selection.Mode = SelectionMode.Multiple;
             document_treeview.Model = store;
         }
 
@@ -182,13 +119,17 @@ namespace Papeles
       
             ListStore docStore = new ListStore(typeof(string), typeof(string),
                                                typeof(string), typeof(string));
-            /*docStore.AppendValues("Jacinto Shy", "Tetrahydrobiopterin",
+            docStore.AppendValues("Jacinto Shy", "Tetrahydrobiopterin",
                                   "J Phys Chem B", "2006");
             docStore.AppendValues("Jacinto Shy", "Nascent HDL",
-            "Nat Struct Mol Biol", "2007");
-            this.CreateLibraryView(docStore);*/
+                                  "Nat Struct Mol Biol", "2007");
+            // docStore.AppendValues(false, "Jacinto Shy", "Tetrahydrobiopterin",
+            //                       "J Phys Chem B", "2006", 3);
+            // docStore.AppendValues(false, "Jacinto Shy", "Nascent HDL",
+            //                       "Nat Struct Mol Biol", "2007", 0);
+            this.CreateLibraryView(docStore);
 
-            //this.DisplayDocument("/home/jacinto/Documents/papers/inference-secco08.pdf");
+            this.DisplayDocument("/home/jacinto/Documents/papers/inference-secco08.pdf");
 
             uint totalPapers = 2;
             statusbar.Push(1, String.Format("{0} papers", totalPapers));
@@ -196,6 +137,106 @@ namespace Papeles
             main_toolbar.IconSize = IconSize.SmallToolbar;
 
             main_window.ShowAll();
+        }
+
+        // Event handlers
+
+        public void OnDelete(object obj, DeleteEventArgs args)
+        {
+            Application.Quit();
+        }
+
+        public void OnFileImport(object obj, EventArgs args)
+        {
+            FileChooserDialog dialog = new FileChooserDialog("Import", null, FileChooserAction.Open,
+                                                             "Cancel", ResponseType.Cancel,
+                                                             "Import", ResponseType.Accept);
+            FileFilter filter = new FileFilter();
+
+            filter.Name = "PDF and PostScript documents";
+            filter.AddMimeType("application/pdf");
+            filter.AddPattern("*.pdf");
+            filter.AddMimeType("application/postscript");
+            filter.AddPattern("*.ps");
+            dialog.AddFilter(filter);
+
+            if (dialog.Run() == (int)ResponseType.Accept) {
+                Console.WriteLine("Import paper");
+            }
+            dialog.Destroy();
+        }
+
+        public void OnFilePrint(object obj, EventArgs args)
+        {
+        }
+
+        public void OnFileQuit(object obj, EventArgs args)
+        {
+            Application.Quit();
+        }
+
+        public void OnEditSelectAll(object obj, EventArgs args)
+        {
+        }
+
+        public void OnEditDocumentInformation(object obj, EventArgs args)
+        {
+        }
+
+        public void OnEditRemoveFromLibrary(object obj, EventArgs args)
+        {
+        }
+
+        public void OnEditDeleteFromDrive(object obj, EventArgs args)
+        {
+        }
+
+        public void OnEditProperties(object obj, EventArgs args)
+        {
+        }
+
+        public void OnEditPreferences(object obj, EventArgs args)
+        {
+        }
+
+        public void OnHelpAbout(object obj, EventArgs args)
+        {
+            AboutDialog dialog = new AboutDialog();
+
+            dialog.ProgramName = "Papeles";
+            dialog.Version = "0.1";
+            dialog.Copyright = "Copyright \u00a9 2009 Jacinto Shy, Jr.";
+            dialog.Run(); // TODO: don't block
+            dialog.Destroy();
+        }
+
+        public void OnPrevPageClicked(object obj, EventArgs args)
+        {
+        }
+
+        public void OnNextPageClicked(object obj, EventArgs args)
+        {
+        }
+
+        public void OnZoomOutClicked(object obj, EventArgs args)
+        {
+            Adjustment adj = toolbar_scale_page.Adjustment;
+
+            if (toolbar_scale_page.Value - adj.PageIncrement >= adj.Lower)
+                toolbar_scale_page.Value -= adj.PageIncrement;
+        }
+
+        public void OnZoomInClicked(object obj, EventArgs args)
+        {
+            Adjustment adj = toolbar_scale_page.Adjustment;
+
+            if (toolbar_scale_page.Value + adj.PageIncrement <= adj.Upper)
+                toolbar_scale_page.Value += adj.PageIncrement;
+        }
+
+        public void OnScalePageValueChanged(object obj, EventArgs args)
+        {
+            // toolbar_scale_page.Value
         }
     }
 }
