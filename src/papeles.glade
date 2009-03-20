@@ -19,21 +19,26 @@
                 <property name="label" translatable="yes">_File</property>
                 <property name="use_underline">True</property>
                 <child>
-                  <widget class="GtkMenu" id="file_menu">
+                  <widget class="GtkMenu" id="menu3">
                     <property name="visible">True</property>
                     <child>
                       <widget class="GtkImageMenuItem" id="file_import_menu_item">
-                        <property name="label" translatable="yes">_Import</property>
+                        <property name="label" translatable="yes">_Import Document</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">False</property>
-                        <signal name="activate" handler="OnFileImport"/>
+                        <signal name="activate" handler="OnFileImportDocument"/>
                         <child internal-child="image">
                           <widget class="GtkImage" id="image1">
                             <property name="visible">True</property>
                             <property name="stock">gtk-add</property>
                           </widget>
                         </child>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkSeparatorMenuItem" id="separatormenuitem1">
+                        <property name="visible">True</property>
                       </widget>
                     </child>
                     <child>
@@ -46,7 +51,7 @@
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkSeparatorMenuItem" id="file_separator1">
+                      <widget class="GtkSeparatorMenuItem" id="separatormenuitem2">
                         <property name="visible">True</property>
                       </widget>
                     </child>
@@ -56,7 +61,6 @@
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <accelerator key="q" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                         <signal name="activate" handler="OnFileQuit"/>
                       </widget>
                     </child>
@@ -73,11 +77,11 @@
                   <widget class="GtkMenu" id="menu1">
                     <property name="visible">True</property>
                     <child>
-                      <widget class="GtkMenuItem" id="edit_select_all_menu_item">
+                      <widget class="GtkImageMenuItem" id="edit_select_all_menu_item">
+                        <property name="label">gtk-select-all</property>
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Select _All</property>
                         <property name="use_underline">True</property>
-                        <accelerator key="A" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                        <property name="use_stock">True</property>
                         <signal name="activate" handler="OnEditSelectAll"/>
                       </widget>
                     </child>
@@ -169,7 +173,7 @@
                 <property name="label" translatable="yes">_Help</property>
                 <property name="use_underline">True</property>
                 <child>
-                  <widget class="GtkMenu" id="help_menu">
+                  <widget class="GtkMenu" id="menu2">
                     <property name="visible">True</property>
                     <child>
                       <widget class="GtkImageMenuItem" id="help_about_menu_item">
@@ -201,7 +205,7 @@
                     <property name="visible">True</property>
                     <property name="tooltip" translatable="yes">Import document</property>
                     <property name="stock_id">gtk-add</property>
-                    <signal name="clicked" handler="OnFileImport"/>
+                    <signal name="clicked" handler="OnFileImportDocument"/>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
@@ -245,7 +249,7 @@
                     <property name="visible">True</property>
                     <property name="tooltip" translatable="yes">Go to previous page</property>
                     <property name="stock_id">gtk-go-back</property>
-                    <signal name="clicked" handler="OnPrevPageClicked"/>
+                    <signal name="clicked" handler="OnPreviousPage"/>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
@@ -257,7 +261,7 @@
                     <property name="visible">True</property>
                     <property name="tooltip" translatable="yes">Go to next page</property>
                     <property name="stock_id">gtk-go-forward</property>
-                    <signal name="clicked" handler="OnNextPageClicked"/>
+                    <signal name="clicked" handler="OnNextPage"/>
                   </widget>
                   <packing>
                     <property name="expand">False</property>

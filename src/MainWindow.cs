@@ -109,6 +109,11 @@ namespace Papeles
             document_viewport.Add(box);
         }
 
+        public void QuitApplication()
+        {
+            Application.Quit();
+        }
+
         public MainWindow()
         {
             Glade.XML gxml = new Glade.XML(null, "papeles.glade", "main_window", null);
@@ -143,10 +148,10 @@ namespace Papeles
 
         public void OnDelete(object obj, DeleteEventArgs args)
         {
-            Application.Quit();
+            this.QuitApplication();
         }
 
-        public void OnFileImport(object obj, EventArgs args)
+        public void OnFileImportDocument(object obj, EventArgs args)
         {
             FileChooserDialog dialog = new FileChooserDialog("Import", null, FileChooserAction.Open,
                                                              "Cancel", ResponseType.Cancel,
@@ -172,7 +177,7 @@ namespace Papeles
 
         public void OnFileQuit(object obj, EventArgs args)
         {
-            Application.Quit();
+            this.QuitApplication();
         }
 
         public void OnEditSelectAll(object obj, EventArgs args)
@@ -210,11 +215,11 @@ namespace Papeles
             dialog.Destroy();
         }
 
-        public void OnPrevPageClicked(object obj, EventArgs args)
+        public void OnPreviousPage(object obj, EventArgs args)
         {
         }
 
-        public void OnNextPageClicked(object obj, EventArgs args)
+        public void OnNextPage(object obj, EventArgs args)
         {
         }
 
