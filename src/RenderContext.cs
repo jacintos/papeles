@@ -19,17 +19,15 @@
 
 namespace Papeles
 {
-	public struct RenderContext
+	public class RenderContext
 	{
-		public int pageIndex;
-		public int rotation;
-		public double scale;
+		public int Rotation { get; set; }
+		public double Scale { get; set; }
 
-		public RenderContext (int pageIndex, int rotation, double scale)
+		public RenderContext (int rotation, double scale)
 		{
-			this.pageIndex = pageIndex;
-			this.rotation = rotation;
-			this.scale = scale;
+			Rotation = rotation;
+			Scale = scale;
 		}
 	}
 }

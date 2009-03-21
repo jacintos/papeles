@@ -3,9 +3,8 @@
   <!-- interface-requires gtk+ 2.16 -->
   <!-- interface-naming-policy toplevel-contextual -->
   <widget class="GtkWindow" id="main_window">
-    <property name="width_request">640</property>
-    <property name="height_request">480</property>
-    <property name="type_hint">dialog</property>
+    <property name="default_width">640</property>
+    <property name="default_height">480</property>
     <signal name="delete_event" handler="OnDelete"/>
     <child>
       <widget class="GtkVBox" id="vbox1">
@@ -293,12 +292,13 @@
                     <property name="visible">True</property>
                     <child>
                       <widget class="GtkHScale" id="toolbar_scale_page">
-                        <property name="width_request">60</property>
+                        <property name="width_request">100</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="adjustment">1 0 5 0.10000000000000001 0.5 1</property>
-                        <property name="draw_value">False</property>
+                        <property name="adjustment">1 0 5 0.050000000000000003 0.25 1</property>
+                        <property name="value_pos">right</property>
                         <signal name="value_changed" handler="OnScalePageValueChanged"/>
+                        <signal name="format_value" handler="FormatZoomScaleValue"/>
                       </widget>
                     </child>
                   </widget>

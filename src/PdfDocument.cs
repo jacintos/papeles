@@ -31,6 +31,7 @@ namespace Papeles
 			get { return document.NPages; }
 		}
 
+		// TODO: Use XMP metadata instead
 		public DocumentInfo Info {
 			get {
 				if (docInfo == null) {
@@ -92,31 +93,30 @@ namespace Papeles
 			}
 		}
 
-		public void Render (RenderContext rc, Gdk.Drawable drawable)
+		public void Render (int pageIndex, RenderContext rc, Gdk.Drawable drawable)
 		{
 			Page page;
 			Cairo.Context context;
 			double width, height;
 
-			if (document != null && rc.pageIndex < document.NPages) {
-				page = document.GetPage (rc.pageIndex);
+			if (document != null && pageIndex < document.NPages) {
+				page = document.GetPage (pageIndex);
 			} else {
 				Console.WriteLine ("Bad page index");
 				return;
 			}
 
 			page.GetSize (out width, out height);
-			width *= rc.scale;
-			height *= rc.scale;
+			width *= rc.Scale;
+			height *= rc.Scale;
 
 			context = Gdk.CairoHelper.Create (drawable);
 			// context.Rectangle(0.0, 0.0, width, height);
-			// context.Clip();
-			// context.Scale(rc.scale, rc.scale);
+			context.Scale(rc.Scale, rc.Scale);
 			page.Render (context);
 
 			// Garbage collection not currently supported in Mono.Cairo
-			(context as System.IDisposable).Dispose ();
+			(context as IDisposable).Dispose ();
 		}
 	}
 }

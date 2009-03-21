@@ -21,22 +21,24 @@ namespace Papeles
 {
 	class RenderedDocument : Gtk.DrawingArea
 	{
+		int pageIndex;
 		RenderContext rc;
 		IDocument doc;
 
-		public RenderedDocument (RenderContext rc, IDocument doc)
+		public RenderedDocument (int pageIndex, RenderContext rc, IDocument doc)
 		{
-			int height, width;
-
+			this.pageIndex = pageIndex;
 			this.rc = rc;
 			this.doc = doc;
-			doc.GetPageSize (rc.pageIndex, out width, out height);
-			this.SetSizeRequest (width, height);
 		}
 
 		protected override bool OnExposeEvent (Gdk.EventExpose args)
 		{
-			doc.Render (rc, args.Window);
+			int width, height;
+
+			doc.GetPageSize (pageIndex, out width, out height);
+			SetSizeRequest ((int) (rc.Scale * width), (int) (rc.Scale * height));
+			doc.Render (pageIndex, rc, args.Window);
 			return true;
 		}
 	}

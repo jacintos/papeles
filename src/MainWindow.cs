@@ -43,7 +43,7 @@ namespace Papeles
         [Glade.Widget] Statusbar statusbar;
 
 		Menu documentTreeViewContextMenu;
-
+		RenderContext renderContext;
 		string configDir;
 		string dataDir;
 		string documentsDir;
@@ -99,6 +99,8 @@ namespace Papeles
             IDocument doc = new PdfDocument ("file://" + filePath, "");
             DocumentInfo info = doc.Info;
 
+			renderContext = new RenderContext(0, 1.0);
+
             if (info.Title == null || info.Title == "")
                 main_window.Title = System.IO.Path.GetFileName (filePath);
             else
@@ -108,7 +110,7 @@ namespace Papeles
 
             Gdk.Color white = new Gdk.Color (0xFF, 0xFF, 0xFF);
             for (int i = 0; i < doc.NPages; i++) {
-                RenderedDocument page = new RenderedDocument (new RenderContext(i, 0, 1.0), doc);
+                RenderedDocument page = new RenderedDocument (i, renderContext, doc);
 
                 page.ModifyBg (StateType.Normal, white);
                 box.Add (page);
@@ -293,8 +295,14 @@ namespace Papeles
 
         public void OnScalePageValueChanged (object obj, EventArgs args)
         {
-            // toolbar_scale_page.Value
+			renderContext.Scale = toolbar_scale_page.Value;
+			document_viewport.QueueDraw ();
         }
+
+		public void FormatZoomScaleValue (object obj, FormatValueArgs args)
+		{
+			args.RetVal = String.Format ("{0}%", Math.Ceiling (args.Value * 100));
+		}
 
 		[GLib.ConnectBefore]
 		public void OnDocumentTreeViewButtonPress (object obj, ButtonPressEventArgs args)
