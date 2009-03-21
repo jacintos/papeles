@@ -281,7 +281,7 @@
                     <property name="visible">True</property>
                     <property name="tooltip" translatable="yes">Zoom out</property>
                     <property name="stock_id">gtk-zoom-out</property>
-                    <signal name="clicked" handler="OnZoomOutClicked"/>
+                    <signal name="clicked" handler="OnZoomOut"/>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
@@ -311,7 +311,7 @@
                     <property name="visible">True</property>
                     <property name="tooltip" translatable="yes">Zoom in</property>
                     <property name="stock_id">gtk-zoom-in</property>
-                    <signal name="clicked" handler="OnZoomInClicked"/>
+                    <signal name="clicked" handler="OnZoomIn"/>
                   </widget>
                   <packing>
                     <property name="expand">False</property>

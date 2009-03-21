@@ -17,41 +17,115 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
+using System.Reflection;
 using Mono.Data.Sqlite;
 
 namespace Papeles
 {
-  class Database
-  {
-    IDbConnection conn;
-    IDbCommand cmd;
+	class Database
+	{
+		static IDbConnection conn;
+		static IDbCommand cmd;
 
-    public Database()
-    {
-      conn = new SqliteConnection("Data Source=test.db3;version=3;") as IDbConnection;
-      conn.Open();
+		public Database ()
+		{
+			string dataSource = "Data Source=test.db3";
+			bool papersTableExists = false, versionTableExists = false;
 
-      cmd = conn.CreateCommand();
+			conn = new SqliteConnection (dataSource);
+			conn.Open ();
+			cmd = conn.CreateCommand ();
 
-      cmd.CommandText =
-@"CREATE TABLE IF NOT EXISTS test (
-    uri TEXT,
-    authors TEXT,
-    title TEXT,
-    journal_name TEXT,
-    journal_volume TEXT,
-    journal_number TEXT,
-    journal_pages TEXT,
-    year TEXT,
-    rating INTEGER,
-    flagged INTEGER,
-    date_added TEXT,
-    date_last_read TEXT,
-    doi TEXT,
-    id INTEGER PRIMARY KEY)";
+			try {
+				DataTable tables = (conn as SqliteConnection).GetSchema ("tables");
 
-      cmd.ExecuteNonQuery();
-    }
-  }
+				foreach (DataRow r in tables.Rows) {
+					if ((string) r ["TABLE_NAME"] == "papers")
+						papersTableExists = true;
+					else if ((string) r ["TABLE_NAME"] == "version")
+						versionTableExists = true;
+				}
+			} catch (NotSupportedException) {
+				Console.WriteLine ("Unable to get metadata");
+			} catch (ArgumentException) {
+				Console.WriteLine ("Unable to get table names from schema");
+			}
+			if (!papersTableExists)
+				Paper.CreateTable (cmd);
+			if (!versionTableExists)
+				CreateVersionTable ();
+		}
+
+		void CreateVersionTable ()
+		{
+			cmd.CommandText = "CREATE TABLE IF NOT EXISTS version ( version TEXT )";
+			cmd.ExecuteNonQuery ();
+		}
+
+		public static void Execute (string command, Object obj, Dictionary<string, DbType> lookup)
+		{
+			try {
+				cmd.CommandText = command;
+				if (obj != null)
+					Database.AddParameters (obj, lookup);
+			} catch (KeyNotFoundException) {
+				Console.WriteLine ("Missing a parameter somewher; not saving object");
+			} finally {
+				cmd.ExecuteNonQuery ();
+			}
+		}
+
+		public static IDataReader Query(string query)
+		{
+			cmd.CommandText = query;
+			IDataReader reader = cmd.ExecuteReader ();
+
+			if (!(reader as SqliteDataReader).HasRows)
+				return null;
+			return reader;
+		}
+
+		public static void AddParameters (Object obj, Dictionary<string, DbType> lookup)
+		{
+			foreach (PropertyInfo prop in obj.GetType ().GetProperties ()) {
+				SqliteParameter param = new SqliteParameter ();
+
+				param.ParameterName = "@" + prop.Name;
+				param.Value = prop.GetValue (obj, null);
+				param.DbType = lookup [prop.Name];
+				cmd.Parameters.Add (param);
+			}
+		}
+
+		public static void SetProperties (Object obj, IDataReader reader, Dictionary<string, DbType> lookup)
+		{
+			Type type = obj.GetType ();
+			String[] columns = new string [reader.FieldCount];
+			int columnNumber = 0;
+
+			reader.GetValues (columns);
+			foreach (string column in columns) {
+				PropertyInfo prop = type.GetProperty (column);
+
+				switch (lookup [column]) {
+				case DbType.String:
+					prop.SetValue (obj, reader.GetString (columnNumber), null);
+					break;
+				case DbType.Int32:
+					prop.SetValue (obj, reader.GetInt32 (columnNumber), null);
+					break;
+				case DbType.DateTime:
+					prop.SetValue (obj, reader.GetDateTime (columnNumber), null);
+					break;
+				default:
+					break;
+				}
+				columnNumber++;
+			}
+		}
+	}
 }

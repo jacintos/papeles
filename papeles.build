@@ -29,7 +29,7 @@
         <include name="System.Data.dll"/>
       </references>
 
-      <resources>
+      <resources prefix="">
         <include name="src/*.glade"/>
       </resources>
     </csc>
