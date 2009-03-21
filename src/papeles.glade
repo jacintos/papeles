@@ -37,11 +37,6 @@
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkSeparatorMenuItem" id="separatormenuitem1">
-                        <property name="visible">True</property>
-                      </widget>
-                    </child>
-                    <child>
                       <widget class="GtkImageMenuItem" id="file_print_menu_item">
                         <property name="label">gtk-print</property>
                         <property name="visible">True</property>
@@ -87,7 +82,7 @@
                     </child>
                     <child>
                       <widget class="GtkImageMenuItem" id="edit_edit_information_menu_item">
-                        <property name="label" translatable="yes">_Edit document information</property>
+                        <property name="label" translatable="yes">_Edit Document Information</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">False</property>
@@ -107,7 +102,7 @@
                     </child>
                     <child>
                       <widget class="GtkImageMenuItem" id="edit_remove_menu_item">
-                        <property name="label" translatable="yes">_Remove from library</property>
+                        <property name="label" translatable="yes">_Remove from Library</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">False</property>
@@ -122,7 +117,7 @@
                     </child>
                     <child>
                       <widget class="GtkImageMenuItem" id="edit_delete_menu_item">
-                        <property name="label">_Delete from drive</property>
+                        <property name="label">_Delete from Drive</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">False</property>
@@ -152,6 +147,11 @@
                             <property name="stock">gtk-properties</property>
                           </widget>
                         </child>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkSeparatorMenuItem" id="separatormenuitem1">
+                        <property name="visible">True</property>
                       </widget>
                     </child>
                     <child>

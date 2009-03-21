@@ -42,6 +42,8 @@ namespace Papeles
         [Glade.Widget] HScale toolbar_scale_page;
         [Glade.Widget] Statusbar statusbar;
 
+		Menu documentTreeViewContextMenu;
+
 		string configDir;
 		string dataDir;
 		string documentsDir;
@@ -120,14 +122,31 @@ namespace Papeles
             Application.Quit ();
         }
 
+		void CreateDocumentTreeViewContextMenu ()
+		{
+			ImageMenuItem edit = new ImageMenuItem ("_Edit Document Information");
+			ImageMenuItem remove = new ImageMenuItem ("_Remove from Library");
+			ImageMenuItem delete = new ImageMenuItem ("_Delete from Drive");
+
+			edit.Image   = new Image (Stock.Edit, IconSize.Menu);
+			remove.Image = new Image (Stock.Remove, IconSize.Menu);
+			delete.Image = new Image (Stock.Delete, IconSize.Menu);
+
+			edit.Activated   += OnEditDocumentInformation;
+			remove.Activated += OnEditRemoveFromLibrary;
+			delete.Activated += OnEditDeleteFromDrive;
+
+			documentTreeViewContextMenu = new Menu ();
+			documentTreeViewContextMenu.Add (edit);
+			documentTreeViewContextMenu.Add (new SeparatorMenuItem ());
+			documentTreeViewContextMenu.Add (remove);
+			documentTreeViewContextMenu.Add (delete);
+		}
+
 		void ShowDocumentTreeViewContextMenu ()
 		{
-			Menu popup = new Menu ();
-
-			popup.Add (new MenuItem ("Foobar"));
-			popup.Add (new MenuItem ("Dilly"));
-			popup.Popup ();
-			popup.ShowAll ();
+			documentTreeViewContextMenu.Popup ();
+			documentTreeViewContextMenu.ShowAll ();
 		}
 
         public MainWindow ()
@@ -160,6 +179,8 @@ namespace Papeles
 								   "J Phys Chem B", "2006", "3");
             docStore.AppendValues ("false", "Jacinto Shy", "Nascent HDL",
 								   "Nat Struct Mol Biol", "2007", "0");
+
+			CreateDocumentTreeViewContextMenu ();
             CreateLibraryView (docStore);
 
             DisplayDocument ("/home/jacinto/Documents/papers/inference-secco08.pdf");
@@ -214,14 +235,17 @@ namespace Papeles
 
         public void OnEditDocumentInformation (object obj, EventArgs args)
         {
+			Console.WriteLine("Edit document information");
         }
 
         public void OnEditRemoveFromLibrary (object obj, EventArgs args)
         {
+			Console.WriteLine("Remove from library");
         }
 
         public void OnEditDeleteFromDrive (object obj, EventArgs args)
         {
+			Console.WriteLine("Delete from drive");
         }
 
         public void OnEditProperties (object obj, EventArgs args)
