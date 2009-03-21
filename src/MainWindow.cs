@@ -42,6 +42,10 @@ namespace Papeles
         [Glade.Widget] HScale toolbar_scale_page;
         [Glade.Widget] Statusbar statusbar;
 
+		string configDir;
+		string dataDir;
+		string documentsDir;
+
         /// <summary>
         /// Populate headers in treeview for library.
         /// </summary>
@@ -132,14 +136,19 @@ namespace Papeles
 
             gxml.Autoconnect (this);
 
-			string dataDir = XdgBaseDirectorySpec.GetUserDirectory ("XDG_DATA_HOME", ".local/share");
-			string appDir = Path.Combine (dataDir, "papeles");
-			string docDir = XdgBaseDirectorySpec.GetUserDirectory ("XDG_DOCUMENTS_DIR", "Documents");
+			configDir    = XdgBaseDirectorySpec.GetUserDirectory ("XDG_CONFIG_HOME", ".config");
+			dataDir      = XdgBaseDirectorySpec.GetUserDirectory ("XDG_DATA_HOME", ".local/share");
+			documentsDir = XdgBaseDirectorySpec.GetUserDirectory ("XDG_DOCUMENTS_DIR", "Documents");
 
-			if (!Directory.Exists (appDir))
-				Directory.CreateDirectory (appDir);
+			configDir = Path.Combine (configDir, "papeles");
+			dataDir   = Path.Combine (dataDir, "papeles");
 
-            Database db = new Database (Path.Combine (appDir, "papeles.db3"));
+			if (!Directory.Exists (configDir))
+				Directory.CreateDirectory (configDir);
+			if (!Directory.Exists (dataDir))
+				Directory.CreateDirectory (dataDir);
+
+            Database db = new Database (Path.Combine (dataDir, "papeles.db3"));
       
             ListStore docStore = new ListStore(typeof(string), typeof(string), typeof(string),
                                                typeof(string), typeof(string), typeof(string));
