@@ -31,9 +31,9 @@ namespace Papeles
 		static IDbConnection conn;
 		static IDbCommand cmd;
 
-		public Database ()
+		public Database (string databaseFile)
 		{
-			string dataSource = "Data Source=test.db3";
+			string dataSource = String.Format ("Data Source={0}", databaseFile);
 			bool papersTableExists = false, versionTableExists = false;
 
 			conn = new SqliteConnection (dataSource);

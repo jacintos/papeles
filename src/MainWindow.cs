@@ -17,8 +17,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+using Banshee.Base;
 using Gtk;
 using System;
+using System.IO;
 
 namespace Papeles
 {
@@ -45,7 +47,7 @@ namespace Papeles
         /// </summary>
         void CreateLibraryView (ListStore store)
         {
-            TreeViewColumn flagColumn    = new TreeViewColumn ("Flag",    new CellRendererToggle (),
+            TreeViewColumn flagColumn    = new TreeViewColumn ("Flag",    new CellRendererText (),
 															   "text",    Column.Flag);
             TreeViewColumn authorsColumn = new TreeViewColumn ("Authors", new CellRendererText (),
 															   "text",    Column.Authors);
@@ -109,10 +111,20 @@ namespace Papeles
             document_viewport.Add (box);
         }
 
-        public void QuitApplication ()
+		void QuitApplication ()
         {
             Application.Quit ();
         }
+
+		void ShowDocumentTreeViewContextMenu ()
+		{
+			Menu popup = new Menu ();
+
+			popup.Add (new MenuItem ("Foobar"));
+			popup.Add (new MenuItem ("Dilly"));
+			popup.Popup ();
+			popup.ShowAll ();
+		}
 
         public MainWindow ()
         {
@@ -120,17 +132,24 @@ namespace Papeles
 
             gxml.Autoconnect (this);
 
-            Database db = new Database ();
+			string dataDir = XdgBaseDirectorySpec.GetUserDirectory ("XDG_DATA_HOME", ".local/share");
+			string appDir = Path.Combine (dataDir, "papeles");
+			string docDir = XdgBaseDirectorySpec.GetUserDirectory ("XDG_DOCUMENTS_DIR", "Documents");
+
+			if (!Directory.Exists (appDir))
+				Directory.CreateDirectory (appDir);
+
+            Database db = new Database (Path.Combine (appDir, "papeles.db3"));
       
-            ListStore docStore = new ListStore(typeof(bool), typeof(string), typeof(string),
+            ListStore docStore = new ListStore(typeof(string), typeof(string), typeof(string),
                                                typeof(string), typeof(string), typeof(string));
             // docStore.AppendValues("Jacinto Shy", "Tetrahydrobiopterin",
             //                       "J Phys Chem B", "2006");
             // docStore.AppendValues("Jacinto Shy", "Nascent HDL",
             //                       "Nat Struct Mol Biol", "2007");
-            docStore.AppendValues (false, "Jacinto Shy", "Tetrahydrobiopterin",
+            docStore.AppendValues ("false", "Jacinto Shy", "Tetrahydrobiopterin",
 								   "J Phys Chem B", "2006", "3");
-            docStore.AppendValues (false, "Jacinto Shy", "Nascent HDL",
+            docStore.AppendValues ("false", "Jacinto Shy", "Nascent HDL",
 								   "Nat Struct Mol Biol", "2007", "0");
             CreateLibraryView (docStore);
 
@@ -243,5 +262,18 @@ namespace Papeles
         {
             // toolbar_scale_page.Value
         }
+
+		[GLib.ConnectBefore]
+		public void OnDocumentTreeViewButtonPress (object obj, ButtonPressEventArgs args)
+		{
+			if (args.Event.Button == 3)
+				ShowDocumentTreeViewContextMenu ();
+		}
+
+		[GLib.ConnectBefore]
+		public void OnDocumentTreeViewPopupMenu (object obj, PopupMenuArgs args)
+		{
+			ShowDocumentTreeViewContextMenu ();
+		}
     }
 }
