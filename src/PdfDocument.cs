@@ -25,7 +25,7 @@ namespace Papeles
 	public class PdfDocument : IDocument
 	{
 		Document document;
-		DocumentInfo docInfo;
+		DocumentInfo doc_info;
 
 		public int NPages {
 			get { return document.NPages; }
@@ -34,21 +34,21 @@ namespace Papeles
 		// TODO: Use XMP metadata instead
 		public DocumentInfo Info {
 			get {
-				if (docInfo == null) {
-					docInfo = new DocumentInfo ();
-					docInfo.Title = document.Title;
-					docInfo.Format = document.Format;
-					docInfo.Author = document.Author;
-					docInfo.Subject = document.Subject;
-					docInfo.Keywords = document.Keywords;
-					docInfo.Creator = document.Creator;
-					docInfo.Producer = document.Producer;
-					docInfo.CreationDate = document.CreationDate;
-					docInfo.ModificationDate = document.ModificationDate;
-					docInfo.Linearized = document.Linearized;
-					docInfo.Metadata = document.Metadata;
+				if (doc_info == null) {
+					doc_info = new DocumentInfo ();
+					doc_info.Title = document.Title;
+					doc_info.Format = document.Format;
+					doc_info.Author = document.Author;
+					doc_info.Subject = document.Subject;
+					doc_info.Keywords = document.Keywords;
+					doc_info.Creator = document.Creator;
+					doc_info.Producer = document.Producer;
+					doc_info.CreationDate = document.CreationDate;
+					doc_info.ModificationDate = document.ModificationDate;
+					doc_info.Linearized = document.Linearized;
+					doc_info.Metadata = document.Metadata;
 				}
-				return docInfo;
+				return doc_info;
 			}
 		}
 

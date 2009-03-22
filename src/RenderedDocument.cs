@@ -22,28 +22,28 @@ namespace Papeles
 	class RenderedDocument : Gtk.DrawingArea
 	{
 		bool initialized;
-		int pageIndex;
+		int page_index;
 		RenderContext rc;
 		IDocument doc;
 
 		public RenderedDocument (int pageIndex, RenderContext rc, IDocument doc)
 		{
-			this.pageIndex = pageIndex;
-			this.rc        = rc;
-			this.doc       = doc;
-			initialized    = false;
+			this.page_index  = pageIndex;
+			this.rc          = rc;
+			this.doc         = doc;
+			this.initialized = false;
 		}
 
 		protected override bool OnExposeEvent (Gdk.EventExpose args)
 		{
 			int width, height;
 
-			doc.GetPageSize (pageIndex, out width, out height);
+			doc.GetPageSize (page_index, out width, out height);
 			SetSizeRequest ((int) (rc.Scale * width), (int) (rc.Scale * height));
 
 			// When container is first shown, the expose-event signall will be sent to all elements
 			if (initialized)
-				doc.Render (pageIndex, rc, args.Window);
+				doc.Render (page_index, rc, args.Window);
 			else
 				initialized = true;
 			return true;

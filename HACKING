@@ -1,0 +1,116 @@
+This document defines many guidelines that should be adhered to when developing 
+for Papeles. These guidelines are derived from the Banshee project guidelines.
+
+C# Coding Style Guidelines
+==========================
+
+These guidelines should be followed when writing code in Papeles. For the most
+part they are similar to the Mono syntax guidelines [1]. Public APIs should
+adhere to the .NET Framework Design Guidelines. [2]
+
+  1. Private variable/field names should be written like:
+
+      lower_case_with_under_scores
+
+  2. Property, event, and method names should be written like:
+
+      UpperCaseStartingLetter
+
+  3. A space before method/conditional parenthesis, braces:
+
+      if (condition) {
+         CallSomeFunction (args);
+      }
+
+  4. One space before a brace on the same line as a conditional or property:
+
+      while (condition) {
+         ...
+      }
+
+  5. Namespace, Class, Method braces on separate lines:
+
+      namespace Foo
+      {
+          public class Bar
+          {
+              private void Method ()
+              {
+                  if (condition) {
+                      ..
+                  }
+              }
+          }
+      }
+
+  6. The exception to rule 5 is for Properties. The brace in the same line
+     with the get/set keyword and the respective getter/setter block all
+     inline, provided the block is simple:
+
+      public string Something {
+          get { return "yay"; }
+      }
+
+  7. If the property accessor block (get/set) is more than one line, use the
+     alternative syntax:
+     
+      public string Something {
+          set {
+              DoSomething ();
+              something = value;
+          }
+      }
+
+  8. There is a space between generic parameters:
+
+      Dictionary<K, V> not Dictionary<K,V>
+
+  9. Use 4 space characters for indention, NOT tabs
+   
+  10. Try to observe a 120 character wrap margin. If your lines are over 120
+     characters, break and indent them logically.
+
+
+.NET API Naming Guidelines
+==========================
+
+  1. Member names should be descriptive and in English. It is best to avoid
+     abbreviations and acronyms.
+
+  2. If an abbreviation or acronym is used, it should be in the form of an 
+     accepted name that is generally well known.
+
+  3. If an acronym is one-two characters long, it should be all caps:
+
+      Paper.ID and not Paper.Id
+
+  4. If an acronym is three or more characters long, only its first letter
+     should be capitalized.
+
+  5. Prefix interfaces with 'I':
+
+      IDocument
+
+
+Implementation Guidelines
+=========================
+
+  1. Use generics and generic collections and other 2.0 features in place of 
+     1.0 features:
+
+      Use List<T> instead of ArrayList, Dictionary<K, V> instead of Hashtable
+
+  2. Do not hard code path separators:
+
+      Use Path.DirectorySeparatorChar and/or Path.Combine
+
+  3. Try not to perform many string concatenations. Use a StringBuilder if
+     necessary.
+   
+  4. Avoid calls to Assembly.GetTypes as memory resulting from these calls
+     will not be GCed.
+
+
+[1] http://www.mono-project.com/Coding_Guidelines
+[2] Highly recommended reading: http://www.amazon.com/gp/product/0321246756/ or
+    view at: http://msdn2.microsoft.com/en-us/library/ms229042.aspx

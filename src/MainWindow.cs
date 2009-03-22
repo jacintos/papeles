@@ -43,11 +43,11 @@ namespace Papeles
         [Glade.Widget] Statusbar statusbar;
 
 		Library library;
-		Menu documentTreeViewContextMenu;
-		RenderContext renderContext;
-		string configDir;
-		string dataDir;
-		string documentsDir;
+		Menu library_context_menu;
+		RenderContext render_context;
+		string config_dir;
+		string data_dir;
+		string documents_dir;
 
         /// <summary>
         /// Populate headers in treeview for library.
@@ -100,7 +100,7 @@ namespace Papeles
             IDocument doc = new PdfDocument ("file://" + filePath, "");
             DocumentInfo info = doc.Info;
 
-			renderContext = new RenderContext(0, 1.0);
+			render_context = new RenderContext(0, 1.0);
 
             if (info.Title == null || info.Title == "")
                 main_window.Title = System.IO.Path.GetFileName (filePath);
@@ -111,7 +111,7 @@ namespace Papeles
 
             Gdk.Color white = new Gdk.Color (0xFF, 0xFF, 0xFF);
             for (int i = 0; i < doc.NPages; i++) {
-                RenderedDocument page = new RenderedDocument (i, renderContext, doc);
+                RenderedDocument page = new RenderedDocument (i, render_context, doc);
 
                 page.ModifyBg (StateType.Normal, white);
                 box.Add (page);
@@ -139,17 +139,17 @@ namespace Papeles
 			remove.Activated += OnEditRemoveFromLibrary;
 			delete.Activated += OnEditDeleteFromDrive;
 
-			documentTreeViewContextMenu = new Menu ();
-			documentTreeViewContextMenu.Add (edit);
-			documentTreeViewContextMenu.Add (new SeparatorMenuItem ());
-			documentTreeViewContextMenu.Add (remove);
-			documentTreeViewContextMenu.Add (delete);
+			library_context_menu = new Menu ();
+			library_context_menu.Add (edit);
+			library_context_menu.Add (new SeparatorMenuItem ());
+			library_context_menu.Add (remove);
+			library_context_menu.Add (delete);
 		}
 
 		void ShowDocumentTreeViewContextMenu ()
 		{
-			documentTreeViewContextMenu.Popup ();
-			documentTreeViewContextMenu.ShowAll ();
+			library_context_menu.Popup ();
+			library_context_menu.ShowAll ();
 		}
 
         public MainWindow ()
@@ -158,20 +158,20 @@ namespace Papeles
 
             gxml.Autoconnect (this);
 
-			configDir    = XdgBaseDirectorySpec.GetUserDirectory ("XDG_CONFIG_HOME", ".config");
-			dataDir      = XdgBaseDirectorySpec.GetUserDirectory ("XDG_DATA_HOME", ".local/share");
-			documentsDir = XdgBaseDirectorySpec.GetUserDirectory ("XDG_DOCUMENTS_DIR", "Documents");
+			config_dir    = XdgBaseDirectorySpec.GetUserDirectory ("XDG_CONFIG_HOME", ".config");
+			data_dir      = XdgBaseDirectorySpec.GetUserDirectory ("XDG_DATA_HOME", ".local/share");
+			documents_dir = XdgBaseDirectorySpec.GetUserDirectory ("XDG_DOCUMENTS_DIR", "Documents");
 
-			configDir = Path.Combine (configDir, "papeles");
-			dataDir   = Path.Combine (dataDir, "papeles");
+			config_dir = Path.Combine (config_dir, "papeles");
+			data_dir   = Path.Combine (data_dir, "papeles");
 
-			if (!Directory.Exists (configDir))
-				Directory.CreateDirectory (configDir);
-			if (!Directory.Exists (dataDir))
-				Directory.CreateDirectory (dataDir);
+			if (!Directory.Exists (config_dir))
+				Directory.CreateDirectory (config_dir);
+			if (!Directory.Exists (data_dir))
+				Directory.CreateDirectory (data_dir);
 
 			library = new Library ();
-            Database db = new Database (Path.Combine (dataDir, "papeles.db3"));
+            Database db = new Database (Path.Combine (data_dir, "papeles.db3"));
       
             ListStore docStore = new ListStore(typeof(string), typeof(string), typeof(string),
                                                typeof(string), typeof(string), typeof(string));
@@ -296,7 +296,7 @@ namespace Papeles
 
         public void OnScalePageValueChanged (object obj, EventArgs args)
         {
-			renderContext.Scale = toolbar_scale_page.Value;
+			render_context.Scale = toolbar_scale_page.Value;
 			document_viewport.QueueDraw ();
         }
 

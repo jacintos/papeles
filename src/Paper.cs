@@ -32,11 +32,9 @@ namespace Papeles
     {
 		static Dictionary<string, DbType> lookup;
 
-		bool partiallyLoaded;
-
         public string   Authors { get; set; }
-        public string   URI { get; set; }
-        public string   DOI { get; set; }
+        public string   Uri { get; set; }
+        public string   Doi { get; set; }
         public string   Title { get; set; }
         public string   Journal { get; set; }
         public string   Volume { get; set; }
@@ -55,10 +53,6 @@ namespace Papeles
         public DateTime ReadAt { get; set;} 
         public int      ID { get; set; }
 
-		public bool PartiallyLoaded {
-			get { return partiallyLoaded; }
-		}
-
 		public void Save ()
 		{
 			if (ID == 0) {
@@ -67,14 +61,14 @@ namespace Papeles
     authors, uri, doi, title, journal, volume, number, month, pages, year, abstract,
     notes, cite_key, keywords, file_path, rating, flagged, imported_at, read_at
 ) VALUES (
-    @Authors, @URI, @DOI, @Title, @Journal, @Volume, @Number, @Month, @Pages, @Year, @Abstract,
+    @Authors, @Uri, @Doi, @Title, @Journal, @Volume, @Number, @Month, @Pages, @Year, @Abstract,
     @Notes, @CiteKey, @Keywords, @FilePath, @Rating, @Flagged, @ImportedAt, @ReadAt
 )";
 				Database.Execute (command, this, lookup);
 			} else {
 				string command =
 @"UPDATE papers SET
-    authors = @Authors, uri = @URI, doi = @DOI, title = @Title, journal = @Journal,
+    authors = @Authors, uri = @Uri, doi = @Doi, title = @Title, journal = @Journal,
     volume = @Volume, number = @Number, month = @Month, pages = @Pages, year = @Year,
     abstract = @Abstract, notes = @Notes, cite_key = @CiteKey, keywords = @Keywords,
     file_path = @FilePath, rating = @Rating, flagged = @Flagged,
@@ -149,8 +143,8 @@ WHERE ID = @ID";
 		{
 			lookup = new Dictionary<string, DbType> ();
 			lookup.Add ("Authors",    DbType.String);
-			lookup.Add ("URI",        DbType.String);
-			lookup.Add ("DOI",        DbType.String);
+			lookup.Add ("Uri",        DbType.String);
+			lookup.Add ("Doi",        DbType.String);
 			lookup.Add ("Title",      DbType.String);
 			lookup.Add ("Journal",    DbType.String);
 			lookup.Add ("Volume",     DbType.String);
