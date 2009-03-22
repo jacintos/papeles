@@ -26,12 +26,12 @@ using Mono.Data.Sqlite;
 
 namespace Papeles
 {
-	class Database
+	public static class Database
 	{
 		static IDbConnection conn;
 		static IDbCommand cmd;
 
-		public Database (string databaseFile)
+		public static void Open (string databaseFile)
 		{
 			string dataSource = String.Format ("Data Source={0}", databaseFile);
 			bool papersTableExists = false, versionTableExists = false;
@@ -60,10 +60,16 @@ namespace Papeles
 				CreateVersionTable ();
 		}
 
-		void CreateVersionTable ()
+		static void CreateVersionTable ()
 		{
 			cmd.CommandText = "CREATE TABLE IF NOT EXISTS version ( version TEXT )";
 			cmd.ExecuteNonQuery ();
+		}
+
+		public static void Close ()
+		{
+			if (conn.State != ConnectionState.Closed)
+				conn.Close ();
 		}
 
 		public static void Execute (string command, Object obj, Dictionary<string, DbType> lookup)
@@ -73,10 +79,33 @@ namespace Papeles
 				if (obj != null)
 					Database.AddParameters (obj, lookup);
 			} catch (KeyNotFoundException) {
-				Console.WriteLine ("Missing a parameter somewher; not saving object");
+				Console.WriteLine ("Missing a parameter somewhere; not executing SQL statement");
 			} finally {
 				cmd.ExecuteNonQuery ();
 			}
+		}
+
+		public static void Execute (string command)
+		{
+			Execute (command, null, null);
+		}
+
+		public static object ExecuteScalar (string command, Object obj, Dictionary<string, DbType> lookup)
+		{
+			try {
+				cmd.CommandText = command;
+				if (obj != null)
+					Database.AddParameters (obj, lookup);
+			} catch (KeyNotFoundException) {
+				Console.WriteLine ("Missing a parameter somewhere; not executing SQL statement");
+				return null;
+			}
+			return cmd.ExecuteScalar ();
+		}
+
+		public static object ExecuteScalar (string command)
+		{
+			return ExecuteScalar (command, null, null);
 		}
 
 		public static IDataReader Query(string query)
@@ -110,6 +139,11 @@ namespace Papeles
 			reader.GetValues (columns);
 			foreach (string column in columns) {
 				PropertyInfo prop = type.GetProperty (column);
+
+				if (reader.IsDBNull (columnNumber)) {
+					prop.SetValue (obj, null, null);
+					continue;
+				}
 
 				switch (lookup [column]) {
 				case DbType.String:

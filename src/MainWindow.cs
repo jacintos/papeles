@@ -171,7 +171,7 @@ namespace Papeles
 				Directory.CreateDirectory (data_dir);
 
 			library = new Library ();
-            Database db = new Database (Path.Combine (data_dir, "papeles.db3"));
+            Database.Open (Path.Combine (data_dir, "papeles.db3"));
       
             ListStore docStore = new ListStore(typeof(string), typeof(string), typeof(string),
                                                typeof(string), typeof(string), typeof(string));

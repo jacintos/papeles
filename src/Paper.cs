@@ -65,6 +65,7 @@ namespace Papeles
     @Notes, @CiteKey, @Keywords, @FilePath, @Rating, @Flagged, @ImportedAt, @ReadAt
 )";
 				Database.Execute (command, this, lookup);
+				ID = Convert.ToInt32 (Database.ExecuteScalar ("SELECT last_insert_rowid()"));
 			} else {
 				string command =
 @"UPDATE papers SET
@@ -81,15 +82,23 @@ WHERE ID = @ID";
 		public void Load ()
 		{
 			string query = String.Format ("SELECT * FROM papers WHERE id = {0}", ID);
-			IDataReader reader = Database.Query(query);
+			IDataReader reader = Database.Query (query);
 
-			if (reader == null)
+			if (reader == null) {
 				Console.WriteLine (String.Format ("Unable to find paper with id {0}", ID));
-			else
-				Database.SetProperties (this, reader, lookup);
+				return;
+			}
+			reader.Read ();
+			Database.SetProperties (this, reader, lookup);
+			reader.Close ();
 		}
 
-		Paper ()
+		public void Delete ()
+		{
+			Database.Execute (String.Format ("DELETE FROM papers WHERE id = {0}", ID));
+		}
+
+		public Paper ()
 		{
 			if (lookup == null)
 				CreateLookupTable ();
