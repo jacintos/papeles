@@ -1,5 +1,5 @@
 /* -*- coding: utf-8 -*- */
-/* RenderedDocument.cs
+/* Library.cs
  * Copyright (c) 2009 Jacinto Shy, Jr.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,34 +19,11 @@
 
 namespace Papeles
 {
-	class RenderedDocument : Gtk.DrawingArea
+	public class Library
 	{
-		bool initialized;
-		int pageIndex;
-		RenderContext rc;
-		IDocument doc;
-
-		public RenderedDocument (int pageIndex, RenderContext rc, IDocument doc)
+		public void Import (string filename)
 		{
-			this.pageIndex = pageIndex;
-			this.rc        = rc;
-			this.doc       = doc;
-			initialized    = false;
-		}
 
-		protected override bool OnExposeEvent (Gdk.EventExpose args)
-		{
-			int width, height;
-
-			doc.GetPageSize (pageIndex, out width, out height);
-			SetSizeRequest ((int) (rc.Scale * width), (int) (rc.Scale * height));
-
-			// When container is first shown, the expose-event signall will be sent to all elements
-			if (initialized)
-				doc.Render (pageIndex, rc, args.Window);
-			else
-				initialized = true;
-			return true;
 		}
 	}
 }

@@ -42,6 +42,7 @@ namespace Papeles
         [Glade.Widget] HScale toolbar_scale_page;
         [Glade.Widget] Statusbar statusbar;
 
+		Library library;
 		Menu documentTreeViewContextMenu;
 		RenderContext renderContext;
 		string configDir;
@@ -169,6 +170,7 @@ namespace Papeles
 			if (!Directory.Exists (dataDir))
 				Directory.CreateDirectory (dataDir);
 
+			library = new Library ();
             Database db = new Database (Path.Combine (dataDir, "papeles.db3"));
       
             ListStore docStore = new ListStore(typeof(string), typeof(string), typeof(string),
@@ -209,16 +211,15 @@ namespace Papeles
 															  "Import", ResponseType.Accept);
             FileFilter filter = new FileFilter ();
 
-            filter.Name = "PDF and PostScript documents";
+            filter.Name = "Documents";
             filter.AddMimeType ("application/pdf");
             filter.AddPattern ("*.pdf");
-            filter.AddMimeType ("application/postscript");
-            filter.AddPattern ("*.ps");
+            // filter.AddMimeType ("application/postscript");
+            // filter.AddPattern ("*.ps");
             dialog.AddFilter (filter);
 
-            if (dialog.Run () == (int)ResponseType.Accept) {
-                Console.WriteLine ("Import paper");
-            }
+            if (dialog.Run () == (int) ResponseType.Accept)
+				library.Import (dialog.Filename);
             dialog.Destroy ();
         }
 
