@@ -32,6 +32,7 @@
 
       <resources prefix="">
         <include name="src/*.glade"/>
+        <include name="src/paperinfo.vm"/>
       </resources>
     </csc>
     <copy todir="build" flatten="true">

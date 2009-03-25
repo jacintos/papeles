@@ -23,6 +23,12 @@ using System;
 using System.IO;
 using WebKit;
 
+using Commons.Collections;
+using NVelocity;
+using NVelocity.App;
+using NVelocity.Context;
+using System.Reflection;
+
 namespace Papeles
 {
     enum Column {
@@ -198,6 +204,24 @@ namespace Papeles
 
             int totalPapers = Library.Count;
             statusbar.Push (1, String.Format ("{0} papers", totalPapers));
+
+			VelocityEngine velocity = new VelocityEngine();
+			ExtendedProperties props = new ExtendedProperties();
+			props.AddProperty("resource.loader", "assembly");
+			props.AddProperty("assembly.resource.loader.class", "NVelocity.Runtime.Resource.Loader.AssemblyResourceLoader, NVelocity");
+			props.AddProperty("assembly.resource.loader.assembly", Assembly.GetExecutingAssembly().GetName().Name);
+			velocity.Init(props);
+			Template template = velocity.GetTemplate("paperinfo.vm");
+			VelocityContext context = new VelocityContext();
+			Paper paper = new Paper();
+			paper.Authors = "Jacinto Shy";
+			paper.Title = "Tetrahydrobiopterin";
+			paper.Journal = "Nature";
+			paper.Year = "2007";
+			context.Put("paper", paper);
+			StringWriter writer = new StringWriter();
+			template.Merge(context, writer);
+			Console.WriteLine(writer.GetStringBuilder().ToString());
 
             main_toolbar.IconSize = IconSize.SmallToolbar;
             document_toolbar.IconSize = IconSize.SmallToolbar;

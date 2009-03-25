@@ -1,0 +1,9 @@
+## -*- mode: html -*-
+<html><body>
+<h1>$paper.Title</h1>
+<h2>$paper.Authors</h2>
+<hr/>
+<p>Abstract: $paper.Abstract</p>
+<hr/>
+<p>$paper.Journal, paper.Year</p>
+</body></html>
