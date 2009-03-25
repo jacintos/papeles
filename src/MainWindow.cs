@@ -21,6 +21,7 @@ using Banshee.Base;
 using Gtk;
 using System;
 using System.IO;
+using WebKit;
 
 namespace Papeles
 {
@@ -38,8 +39,10 @@ namespace Papeles
         [Glade.Widget] Window main_window;
         [Glade.Widget] Viewport document_viewport;
         [Glade.Widget] Toolbar main_toolbar;
+        [Glade.Widget] Toolbar document_toolbar;
         [Glade.Widget] TreeView document_treeview;
         [Glade.Widget] HScale toolbar_scale_page;
+		[Glade.Widget] ScrolledWindow paper_information;
         [Glade.Widget] Statusbar statusbar;
 
 		Menu library_context_menu;
@@ -189,10 +192,15 @@ namespace Papeles
 
             DisplayDocument ("/home/jacinto/Documents/papers/inference-secco08.pdf");
 
+			WebView webView = new WebView ();
+			paper_information.Add (webView);
+			webView.LoadHtmlString ("<html><body><h1>Inference</h1></body></html>", "");
+
             int totalPapers = Library.Count;
             statusbar.Push (1, String.Format ("{0} papers", totalPapers));
 
             main_toolbar.IconSize = IconSize.SmallToolbar;
+            document_toolbar.IconSize = IconSize.SmallToolbar;
 
             main_window.ShowAll ();
         }
@@ -323,13 +331,13 @@ namespace Papeles
 			string authors = paper.Authors, title = paper.Title, journal = paper.Journal, year = paper.Year;
 
 			if (authors == null)
-				authors = "<not specified>";
+				authors = "<authors>";
 			if (title == null)
-				title = "<not specified>";
+				title = "<title>";
 			if (journal == null)
-				journal = "<not specified>";
+				journal = "<journal>";
 			if (year == null)
-				year = "<not specified>";
+				year = "<year>";
 
 			library_store.AppendValues (authors, title, journal, year);
 		}

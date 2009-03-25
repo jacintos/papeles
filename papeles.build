@@ -20,6 +20,7 @@
       <pkg-references>
         <package name="gtk-sharp-2.0"/>
         <package name="glade-sharp-2.0"/>
+        <package name="webkit-sharp-1.0"/>
       </pkg-references>
 
       <references>
