@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Papeles" default="all">
+<project name="Papeles" default="compile">
   <property name="debug" value="true"/>
-  <target name="all"/>
 
   <target name="clean" description="Remove built files">
     <delete dir="build" if="${directory::exists('build')}"/>
@@ -25,6 +24,7 @@
 
       <references>
         <include name="lib/poppler-sharp.dll"/>
+        <include name="lib/NVelocity.dll"/>
         <include name="Mono.Cairo.dll"/>
         <include name="Mono.Data.Sqlite.dll"/>
         <include name="System.Data.dll"/>
