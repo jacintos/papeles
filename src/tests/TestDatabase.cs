@@ -33,7 +33,7 @@ namespace Papeles
 		[SetUp] public void Init ()
 		{
 			database_file = "test.db3";
-			Database.Open (database_file);
+			Database.Load (database_file);
 		}
 
 		[TearDown] public void Dispose ()

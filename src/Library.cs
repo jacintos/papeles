@@ -17,13 +17,78 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Papeles
 {
-	public class Library
+	// TODO: callback on paper added to library or removed from library
+	public static class Library
 	{
-		public void Import (string filename)
-		{
+		static List<Paper> papers = new List<Paper> ();
 
+		public delegate void PaperAddedHandler (Paper paper);
+		public delegate void PaperRemovedHandler (Paper paper);
+
+		public static PaperAddedHandler PaperAdded;
+		public static PaperRemovedHandler PaperRemoved;
+
+		/// <summary>
+		/// Get the number of papers in the library.
+		/// </summary>
+		public static int Count {
+			get { return papers.Count; }
+		}
+
+		public static List<Paper> Papers {
+			get { return papers; }
+		}
+
+		/// <summary>
+		/// Load the library from the database. Database should obviously be
+		/// loaded first.
+		/// </summary>
+		public static void Load ()
+		{
+			// Test if database is open here because this happens at initialization,
+			// so it's kind of subtle.
+			if (!Database.Open)
+				return; // FIXME: this should be an exception
+
+			papers = Paper.All ();
+		}
+
+		public static void Add (string filename)
+		{
+			Paper paper = new Paper (filename);
+
+			papers.Add (paper);
+			if (PaperAdded != null)
+				PaperAdded (paper);
+		}
+
+		public static void Add (Paper paper)
+		{
+			papers.Add (paper);
+			if (PaperAdded != null)
+				PaperAdded (paper);
+		}
+
+		delegate bool SavePaper (Paper p);
+
+		public static void Remove (int id)
+		{
+			Paper paper = null;
+			SavePaper save = p => { paper = p; return true; };
+
+			papers.RemoveAll (p => p.ID == id && save (p));
+			if (paper != null && PaperRemoved != null)
+				PaperRemoved (paper);
+		}
+
+		public static bool Contains (int id)
+		{
+			return papers.Find ((paper => paper.ID == id)) == null;
 		}
 	}
 }

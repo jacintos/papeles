@@ -104,6 +104,20 @@ WHERE ID = @ID";
 				CreateLookupTable ();
 		}
 
+		public Paper (int id)
+		{
+			ID = id;
+			if (lookup == null)
+				CreateLookupTable ();
+		}
+
+		public Paper (string filename)
+		{
+			FilePath = filename;
+			if (lookup == null)
+				CreateLookupTable ();
+		}
+
 		public static void CreateTable(IDbCommand cmd)
 		{
 			cmd.CommandText =
@@ -130,6 +144,27 @@ WHERE ID = @ID";
     id INTEGER PRIMARY KEY
 )";
 			cmd.ExecuteNonQuery ();
+		}
+
+		public static List<Paper> All ()
+		{
+			string query = "SELECT authors, title, journal, year, rating, flagged FROM papers";
+			IDataReader reader = Database.Query (query);
+			List<Paper> papers = new List<Paper> ();
+
+			if (reader == null) {
+				Console.WriteLine ("No papers in the database");
+				return papers;
+			}
+
+			while (reader.Read ()) {
+				Paper paper = new Paper ();
+
+				Database.SetProperties (paper, reader, lookup);
+				reader.Close ();
+				papers.Add (paper);
+			}
+			return papers;
 		}
 
 		public static Paper FindById (int id)
@@ -173,4 +208,19 @@ WHERE ID = @ID";
 			lookup.Add ("ID",         DbType.Int32);
 		}
     }
+
+	class PaperComparer : IEqualityComparer<Paper>
+	{
+		public bool Equals (Paper a, Paper b)
+		{
+			return a.ID == b.ID;
+		}
+
+		public int GetHashCode (Paper paper)
+		{
+			if (Object.ReferenceEquals (paper, null))
+				return 0;
+			return paper.ID.GetHashCode ();
+		}
+	}
 }

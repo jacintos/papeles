@@ -31,7 +31,15 @@ namespace Papeles
 		static IDbConnection conn;
 		static IDbCommand cmd;
 
-		public static void Open (string databaseFile)
+		public static bool Open {
+			get { return conn.State == ConnectionState.Open; }
+		}
+
+		public static bool Closed {
+			get { return conn.State == ConnectionState.Closed; }
+		}
+ 
+		public static void Load (string databaseFile)
 		{
 			string dataSource = String.Format ("Data Source={0}", databaseFile);
 			bool papersTableExists = false, versionTableExists = false;
@@ -68,7 +76,7 @@ namespace Papeles
 
 		public static void Close ()
 		{
-			if (conn.State != ConnectionState.Closed)
+			if (!Closed)
 				conn.Close ();
 		}
 

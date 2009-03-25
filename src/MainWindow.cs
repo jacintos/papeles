@@ -25,12 +25,12 @@ using System.IO;
 namespace Papeles
 {
     enum Column {
-        Flag = 0,
+        //Flag,
         Authors,
         Title,
         Journal,
         Year,
-        Rating
+        //Rating
     }
 
     class MainWindow
@@ -42,20 +42,48 @@ namespace Papeles
         [Glade.Widget] HScale toolbar_scale_page;
         [Glade.Widget] Statusbar statusbar;
 
-		Library library;
 		Menu library_context_menu;
+		ListStore library_store;
 		RenderContext render_context;
 		string config_dir;
 		string data_dir;
 		string documents_dir;
 
+		void CreateDocumentTreeViewContextMenu ()
+		{
+			ImageMenuItem edit = new ImageMenuItem ("_Edit Document Information");
+			ImageMenuItem remove = new ImageMenuItem ("_Remove from Library");
+			ImageMenuItem delete = new ImageMenuItem ("_Delete from Drive");
+
+			edit.Image   = new Image (Stock.Edit, IconSize.Menu);
+			remove.Image = new Image (Stock.Remove, IconSize.Menu);
+			delete.Image = new Image (Stock.Delete, IconSize.Menu);
+
+			edit.Activated   += OnEditDocumentInformation;
+			remove.Activated += OnEditRemoveFromLibrary;
+			delete.Activated += OnEditDeleteFromDrive;
+
+			library_context_menu = new Menu ();
+			library_context_menu.Add (edit);
+			library_context_menu.Add (new SeparatorMenuItem ());
+			library_context_menu.Add (remove);
+			library_context_menu.Add (delete);
+		}
+
+		void CreateLibraryStore ()
+		{
+            library_store = new ListStore (typeof(string), typeof(string), typeof(string), typeof(string));
+			foreach (Paper paper in Library.Papers)
+				AddPaperToLibraryStore (paper);
+		}
+
         /// <summary>
         /// Populate headers in treeview for library.
         /// </summary>
-        void CreateLibraryView (ListStore store)
+        void CreateLibraryView ()
         {
-            TreeViewColumn flagColumn    = new TreeViewColumn ("Flag",    new CellRendererText (),
-															   "text",    Column.Flag);
+            // TreeViewColumn flagColumn    = new TreeViewColumn ("Flag",    new CellRendererText (),
+			// 												   "text",    Column.Flag);
             TreeViewColumn authorsColumn = new TreeViewColumn ("Authors", new CellRendererText (),
 															   "text",    Column.Authors);
             TreeViewColumn titleColumn   = new TreeViewColumn ("Title",   new CellRendererText (),
@@ -64,35 +92,35 @@ namespace Papeles
 															   "text",    Column.Journal);
             TreeViewColumn yearColumn    = new TreeViewColumn ("Year",    new CellRendererText (),
 															   "text",    Column.Year);
-            TreeViewColumn ratingColumn  = new TreeViewColumn ("Rating",  new CellRendererText (),
-															   "text",    Column.Rating);
+            // TreeViewColumn ratingColumn  = new TreeViewColumn ("Rating",  new CellRendererText (),
+			// 												   "text",    Column.Rating);
 
             authorsColumn.SortColumnId = (int) Column.Authors;
             titleColumn.SortColumnId   = (int) Column.Title;
             journalColumn.SortColumnId = (int) Column.Journal;
             yearColumn.SortColumnId    = (int) Column.Year;
-            ratingColumn.SortColumnId  = (int) Column.Rating;
+            // ratingColumn.SortColumnId  = (int) Column.Rating;
 
             authorsColumn.Expand = true;
             titleColumn.Expand   = true;
             journalColumn.Expand = true;
             yearColumn.Expand    = true;
-            ratingColumn.Expand  = true;
+            // ratingColumn.Expand  = true;
 
             authorsColumn.Resizable = true;
             titleColumn.Resizable   = true;
             journalColumn.Resizable = true;
             yearColumn.Resizable    = true;
 
-            document_treeview.AppendColumn (flagColumn);
+            // document_treeview.AppendColumn (flagColumn);
             document_treeview.AppendColumn (authorsColumn);
             document_treeview.AppendColumn (titleColumn);
             document_treeview.AppendColumn (journalColumn);
             document_treeview.AppendColumn (yearColumn);
-            document_treeview.AppendColumn (ratingColumn);
+            // document_treeview.AppendColumn (ratingColumn);
 
             document_treeview.Selection.Mode = SelectionMode.Multiple;
-            document_treeview.Model = store;
+            document_treeview.Model = library_store;
         }
 
         void DisplayDocument (string filePath)
@@ -125,27 +153,6 @@ namespace Papeles
             Application.Quit ();
         }
 
-		void CreateDocumentTreeViewContextMenu ()
-		{
-			ImageMenuItem edit = new ImageMenuItem ("_Edit Document Information");
-			ImageMenuItem remove = new ImageMenuItem ("_Remove from Library");
-			ImageMenuItem delete = new ImageMenuItem ("_Delete from Drive");
-
-			edit.Image   = new Image (Stock.Edit, IconSize.Menu);
-			remove.Image = new Image (Stock.Remove, IconSize.Menu);
-			delete.Image = new Image (Stock.Delete, IconSize.Menu);
-
-			edit.Activated   += OnEditDocumentInformation;
-			remove.Activated += OnEditRemoveFromLibrary;
-			delete.Activated += OnEditDeleteFromDrive;
-
-			library_context_menu = new Menu ();
-			library_context_menu.Add (edit);
-			library_context_menu.Add (new SeparatorMenuItem ());
-			library_context_menu.Add (remove);
-			library_context_menu.Add (delete);
-		}
-
 		void ShowDocumentTreeViewContextMenu ()
 		{
 			library_context_menu.Popup ();
@@ -170,26 +177,19 @@ namespace Papeles
 			if (!Directory.Exists (data_dir))
 				Directory.CreateDirectory (data_dir);
 
-			library = new Library ();
-            Database.Open (Path.Combine (data_dir, "papeles.db3"));
-      
-            ListStore docStore = new ListStore(typeof(string), typeof(string), typeof(string),
-                                               typeof(string), typeof(string), typeof(string));
-            // docStore.AppendValues("Jacinto Shy", "Tetrahydrobiopterin",
-            //                       "J Phys Chem B", "2006");
-            // docStore.AppendValues("Jacinto Shy", "Nascent HDL",
-            //                       "Nat Struct Mol Biol", "2007");
-            docStore.AppendValues ("false", "Jacinto Shy", "Tetrahydrobiopterin",
-								   "J Phys Chem B", "2006", "3");
-            docStore.AppendValues ("false", "Jacinto Shy", "Nascent HDL",
-								   "Nat Struct Mol Biol", "2007", "0");
+            Database.Load (Path.Combine (data_dir, "papeles.db3"));
+			Library.Load ();
 
+			Library.PaperAdded   += AddPaperToLibraryStore;
+			Library.PaperRemoved += RemovePaperFromLibraryStore;
+      
 			CreateDocumentTreeViewContextMenu ();
-            CreateLibraryView (docStore);
+			CreateLibraryStore ();
+            CreateLibraryView ();
 
             DisplayDocument ("/home/jacinto/Documents/papers/inference-secco08.pdf");
 
-            uint totalPapers = 2;
+            int totalPapers = Library.Count;
             statusbar.Push (1, String.Format ("{0} papers", totalPapers));
 
             main_toolbar.IconSize = IconSize.SmallToolbar;
@@ -219,7 +219,7 @@ namespace Papeles
             dialog.AddFilter (filter);
 
             if (dialog.Run () == (int) ResponseType.Accept)
-				library.Import (dialog.Filename);
+				Library.Add (dialog.Filename);
             dialog.Destroy ();
         }
 
@@ -316,6 +316,26 @@ namespace Papeles
 		public void OnDocumentTreeViewPopupMenu (object obj, PopupMenuArgs args)
 		{
 			ShowDocumentTreeViewContextMenu ();
+		}
+
+		public void AddPaperToLibraryStore (Paper paper)
+		{
+			string authors = paper.Authors, title = paper.Title, journal = paper.Journal, year = paper.Year;
+
+			if (authors == null)
+				authors = "<not specified>";
+			if (title == null)
+				title = "<not specified>";
+			if (journal == null)
+				journal = "<not specified>";
+			if (year == null)
+				year = "<not specified>";
+
+			library_store.AppendValues (authors, title, journal, year);
+		}
+
+		public void RemovePaperFromLibraryStore (Paper paper)
+		{
 		}
     }
 }
