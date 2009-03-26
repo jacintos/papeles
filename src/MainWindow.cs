@@ -48,8 +48,8 @@ namespace Papeles
         [Glade.Widget] Toolbar document_toolbar;
         [Glade.Widget] TreeView document_treeview;
         [Glade.Widget] HScale toolbar_scale_page;
-		[Glade.Widget] VBox paper_properties_vbox;
 		[Glade.Widget] ScrolledWindow paper_properties_window;
+		[Glade.Widget] Alignment paper_properties_frame_inner;
         [Glade.Widget] Statusbar statusbar;
 
 		Menu library_context_menu;
@@ -163,8 +163,11 @@ namespace Papeles
 
 			paper_properties_icon_view.PixbufColumn = 0;
 			paper_properties_icon_view.TextColumn = 1;
+			paper_properties_icon_view.MarkupColumn = 1;
+			paper_properties_icon_view.ItemWidth = 185;
+			paper_properties_icon_view.Orientation = Orientation.Horizontal;
 			// paper_properties_icon_view.ItemActivated += ;
-			paper_properties_vbox.Add (paper_properties_icon_view);
+			paper_properties_frame_inner.Add (paper_properties_icon_view);
 
 			paper_properties_web_view = new WebView ();
 			paper_properties_window.Add (paper_properties_web_view);
@@ -217,9 +220,12 @@ namespace Papeles
 			paper_properties_web_view.LoadHtmlString (writer.GetStringBuilder ().ToString (), "");
 
 			// FIXME: get icon based on mime-type
-			Gdk.Pixbuf icon = IconTheme.Default.LoadIcon ("gnome-fs-regular", 48, (IconLookupFlags) 0);
+			Gdk.Pixbuf icon = IconTheme.Default.LoadIcon ("gnome-fs-regular", 32, (IconLookupFlags) 0);
 			properties_icon_store.Clear ();
-			properties_icon_store.AppendValues (icon, paper.FilePath);
+
+			string fileName = Path.GetFileName (paper.FilePath).Truncate (18, "...");
+			string label = String.Format ("<b>{0}</b>\n{1}", fileName, "2.8 MB");
+			properties_icon_store.AppendValues (icon, label);
 		}
 
         public MainWindow ()
