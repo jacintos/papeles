@@ -18,16 +18,15 @@
  */
 
 using Banshee.Base;
-using Gtk;
-using System;
-using System.IO;
-using WebKit;
-
 using Commons.Collections;
+using Gtk;
 using NVelocity;
 using NVelocity.App;
 using NVelocity.Context;
+using System;
+using System.IO;
 using System.Reflection;
+using WebKit;
 
 namespace Papeles
 {
@@ -37,7 +36,8 @@ namespace Papeles
         Title,
         Journal,
         Year,
-        //Rating
+        //Rating,
+		ID
     }
 
     class MainWindow
@@ -48,12 +48,17 @@ namespace Papeles
         [Glade.Widget] Toolbar document_toolbar;
         [Glade.Widget] TreeView document_treeview;
         [Glade.Widget] HScale toolbar_scale_page;
-		[Glade.Widget] ScrolledWindow paper_information;
+		[Glade.Widget] VBox paper_properties_vbox;
+		[Glade.Widget] ScrolledWindow paper_properties_window;
         [Glade.Widget] Statusbar statusbar;
 
 		Menu library_context_menu;
 		ListStore library_store;
+		ListStore properties_icon_store;
+		WebView paper_properties_web_view;
+		IconView paper_properties_icon_view;
 		RenderContext render_context;
+		VelocityEngine template_engine;
 		string config_dir;
 		string data_dir;
 		string documents_dir;
@@ -81,7 +86,9 @@ namespace Papeles
 
 		void CreateLibraryStore ()
 		{
-            library_store = new ListStore (typeof(string), typeof(string), typeof(string), typeof(string));
+            library_store = new ListStore (typeof(string), typeof(string), typeof(string), typeof(string),
+										   typeof(string));
+
 			foreach (Paper paper in Library.Papers)
 				AddPaperToLibraryStore (paper);
 		}
@@ -101,8 +108,12 @@ namespace Papeles
 															   "text",    Column.Journal);
             TreeViewColumn yearColumn    = new TreeViewColumn ("Year",    new CellRendererText (),
 															   "text",    Column.Year);
+            TreeViewColumn idColumn      = new TreeViewColumn ("ID",      new CellRendererText (),
+															   "text",    Column.ID);
             // TreeViewColumn ratingColumn  = new TreeViewColumn ("Rating",  new CellRendererText (),
 			// 												   "text",    Column.Rating);
+
+			idColumn.Visible = false;
 
             authorsColumn.SortColumnId = (int) Column.Authors;
             titleColumn.SortColumnId   = (int) Column.Title;
@@ -129,8 +140,35 @@ namespace Papeles
             // document_treeview.AppendColumn (ratingColumn);
 
             document_treeview.Selection.Mode = SelectionMode.Multiple;
+			document_treeview.Selection.Changed += OnLibrarySelectedPaperChanged;
             document_treeview.Model = library_store;
         }
+
+		void CreateTemplateEngine ()
+		{
+			ExtendedProperties props = new ExtendedProperties ();
+
+			props.AddProperty ("resource.loader", "assembly");
+			props.AddProperty ("assembly.resource.loader.class", "NVelocity.Runtime.Resource.Loader.AssemblyResourceLoader, NVelocity");
+			props.AddProperty ("assembly.resource.loader.assembly", Assembly.GetExecutingAssembly ().GetName ().Name);
+
+			template_engine = new VelocityEngine ();
+			template_engine.Init (props);
+		}
+
+		void CreatePaperPropertiesView ()
+		{
+			properties_icon_store = new ListStore (typeof (Gdk.Pixbuf), typeof (string));
+			paper_properties_icon_view = new IconView (properties_icon_store);
+
+			paper_properties_icon_view.PixbufColumn = 0;
+			paper_properties_icon_view.TextColumn = 1;
+			// paper_properties_icon_view.ItemActivated += ;
+			paper_properties_vbox.Add (paper_properties_icon_view);
+
+			paper_properties_web_view = new WebView ();
+			paper_properties_window.Add (paper_properties_web_view);
+		}
 
         void DisplayDocument (string filePath)
         {
@@ -168,6 +206,22 @@ namespace Papeles
 			library_context_menu.ShowAll ();
 		}
 
+		public void ShowPaperInformation (Paper paper)
+		{
+			Template template = template_engine.GetTemplate ("paperinfo.vm");
+			VelocityContext context = new VelocityContext ();
+			StringWriter writer = new StringWriter ();
+
+			context.Put ("paper", paper);
+			template.Merge (context, writer);
+			paper_properties_web_view.LoadHtmlString (writer.GetStringBuilder ().ToString (), "");
+
+			// FIXME: get icon based on mime-type
+			Gdk.Pixbuf icon = IconTheme.Default.LoadIcon ("gnome-fs-regular", 48, (IconLookupFlags) 0);
+			properties_icon_store.Clear ();
+			properties_icon_store.AppendValues (icon, paper.FilePath);
+		}
+
         public MainWindow ()
         {
             Glade.XML gxml = new Glade.XML (null, "papeles.glade", "main_window", null);
@@ -195,33 +249,13 @@ namespace Papeles
 			CreateDocumentTreeViewContextMenu ();
 			CreateLibraryStore ();
             CreateLibraryView ();
+			CreateTemplateEngine ();
+			CreatePaperPropertiesView ();
 
             DisplayDocument ("/home/jacinto/Documents/papers/inference-secco08.pdf");
 
-			WebView webView = new WebView ();
-			paper_information.Add (webView);
-			webView.LoadHtmlString ("<html><body><h1>Inference</h1></body></html>", "");
-
             int totalPapers = Library.Count;
             statusbar.Push (1, String.Format ("{0} papers", totalPapers));
-
-			VelocityEngine velocity = new VelocityEngine();
-			ExtendedProperties props = new ExtendedProperties();
-			props.AddProperty("resource.loader", "assembly");
-			props.AddProperty("assembly.resource.loader.class", "NVelocity.Runtime.Resource.Loader.AssemblyResourceLoader, NVelocity");
-			props.AddProperty("assembly.resource.loader.assembly", Assembly.GetExecutingAssembly().GetName().Name);
-			velocity.Init(props);
-			Template template = velocity.GetTemplate("paperinfo.vm");
-			VelocityContext context = new VelocityContext();
-			Paper paper = new Paper();
-			paper.Authors = "Jacinto Shy";
-			paper.Title = "Tetrahydrobiopterin";
-			paper.Journal = "Nature";
-			paper.Year = "2007";
-			context.Put("paper", paper);
-			StringWriter writer = new StringWriter();
-			template.Merge(context, writer);
-			Console.WriteLine(writer.GetStringBuilder().ToString());
 
             main_toolbar.IconSize = IconSize.SmallToolbar;
             document_toolbar.IconSize = IconSize.SmallToolbar;
@@ -350,20 +384,26 @@ namespace Papeles
 			ShowDocumentTreeViewContextMenu ();
 		}
 
+		// Non-GTK widget callbacks
+
+		public void OnLibrarySelectedPaperChanged(object obj, EventArgs args)
+		{
+			TreeSelection selection = obj as TreeSelection;
+
+			if (selection.CountSelectedRows () == 1) {
+				TreePath path = selection.GetSelectedRows ()[0];
+				TreeIter iter;
+				int id;
+
+				library_store.GetIter (out iter, path);
+				id = Convert.ToInt32(library_store.GetValue (iter, (int) Column.ID));
+				ShowPaperInformation (Library.GetPaper (id));
+			}
+		}
+
 		public void AddPaperToLibraryStore (Paper paper)
 		{
-			string authors = paper.Authors, title = paper.Title, journal = paper.Journal, year = paper.Year;
-
-			if (authors == null)
-				authors = "<authors>";
-			if (title == null)
-				title = "<title>";
-			if (journal == null)
-				journal = "<journal>";
-			if (year == null)
-				year = "<year>";
-
-			library_store.AppendValues (authors, title, journal, year);
+			library_store.AppendValues (paper.Authors, paper.Title, paper.Journal, paper.Year, Convert.ToString(paper.ID));
 		}
 
 		public void RemovePaperFromLibraryStore (Paper paper)

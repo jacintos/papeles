@@ -202,7 +202,7 @@
                 <child>
                   <widget class="GtkToolButton" id="toolbar_import">
                     <property name="visible">True</property>
-                    <property name="tooltip" translatable="yes">Import document</property>
+                    <property name="tooltip" translatable="yes">Import Document</property>
                     <property name="stock_id">gtk-add</property>
                     <signal name="clicked" handler="OnFileImportDocument"/>
                   </widget>
@@ -214,7 +214,7 @@
                 <child>
                   <widget class="GtkToolButton" id="toolbar_edit">
                     <property name="visible">True</property>
-                    <property name="tooltip" translatable="yes">Edit document information</property>
+                    <property name="tooltip" translatable="yes">Edit Document Information</property>
                     <property name="stock_id">gtk-edit</property>
                     <signal name="clicked" handler="OnEditDocumentInformation"/>
                   </widget>
@@ -226,7 +226,7 @@
                 <child>
                   <widget class="GtkToolButton" id="toolbar_print">
                     <property name="visible">True</property>
-                    <property name="tooltip" translatable="yes">Print document</property>
+                    <property name="tooltip" translatable="yes">Print Document</property>
                     <property name="stock_id">gtk-print</property>
                     <signal name="clicked" handler="OnFilePrint"/>
                   </widget>
@@ -246,37 +246,37 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <child>
-                  <widget class="GtkVPaned" id="vpaned1">
+                  <widget class="GtkVBox" id="vbox3">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
                     <child>
-                      <widget class="GtkScrolledWindow" id="scrolledwindow1">
-                        <property name="width_request">600</property>
+                      <widget class="GtkVPaned" id="vpaned1">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">never</property>
-                        <property name="vscrollbar_policy">automatic</property>
-                        <property name="shadow_type">in</property>
                         <child>
-                          <widget class="GtkTreeView" id="document_treeview">
-                            <property name="height_request">200</property>
+                          <widget class="GtkScrolledWindow" id="scrolledwindow1">
+                            <property name="width_request">600</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="rules_hint">True</property>
-                            <property name="rubber_banding">True</property>
-                            <signal name="button_press_event" handler="OnDocumentTreeViewButtonPress"/>
-                            <signal name="popup_menu" handler="OnDocumentTreeViewPopupMenu"/>
+                            <property name="hscrollbar_policy">never</property>
+                            <property name="vscrollbar_policy">automatic</property>
+                            <property name="shadow_type">in</property>
+                            <child>
+                              <widget class="GtkTreeView" id="document_treeview">
+                                <property name="height_request">200</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="rules_hint">True</property>
+                                <property name="rubber_banding">True</property>
+                                <signal name="button_press_event" handler="OnDocumentTreeViewButtonPress"/>
+                                <signal name="popup_menu" handler="OnDocumentTreeViewPopupMenu"/>
+                              </widget>
+                            </child>
                           </widget>
+                          <packing>
+                            <property name="resize">False</property>
+                            <property name="shrink">True</property>
+                          </packing>
                         </child>
-                      </widget>
-                      <packing>
-                        <property name="resize">False</property>
-                        <property name="shrink">True</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkVBox" id="vbox3">
-                        <property name="visible">True</property>
                         <child>
                           <widget class="GtkScrolledWindow" id="scrolledwindow2">
                             <property name="visible">True</property>
@@ -296,97 +296,101 @@
                             </child>
                           </widget>
                           <packing>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkToolbar" id="document_toolbar">
-                            <property name="visible">True</property>
-                            <child>
-                              <widget class="GtkToolButton" id="toolbar_prev_page">
-                                <property name="visible">True</property>
-                                <property name="has_tooltip">True</property>
-                                <property name="tooltip" translatable="yes">Go to previous page</property>
-                                <property name="stock_id">gtk-go-back</property>
-                                <signal name="clicked" handler="OnPreviousPage"/>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkToolButton" id="toolbar_next_page">
-                                <property name="visible">True</property>
-                                <property name="has_tooltip">True</property>
-                                <property name="tooltip" translatable="yes">Go to next page</property>
-                                <property name="stock_id">gtk-go-forward</property>
-                                <signal name="clicked" handler="OnNextPage"/>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkSeparatorToolItem" id="toolsep1">
-                                <property name="visible">True</property>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkToolButton" id="toolbar_zoom_out">
-                                <property name="visible">True</property>
-                                <property name="has_tooltip">True</property>
-                                <property name="tooltip" translatable="yes">Zoom out</property>
-                                <property name="stock_id">gtk-zoom-out</property>
-                                <signal name="clicked" handler="OnZoomOut"/>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkToolItem" id="toolbar_scale_item">
-                                <property name="visible">True</property>
-                                <child>
-                                  <widget class="GtkHScale" id="toolbar_scale_page">
-                                    <property name="width_request">100</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="adjustment">1 0 5 0.050000000000000003 0.25 1</property>
-                                    <property name="value_pos">right</property>
-                                    <signal name="value_changed" handler="OnScalePageValueChanged"/>
-                                    <signal name="format_value" handler="FormatZoomScaleValue"/>
-                                  </widget>
-                                </child>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkToolButton" id="toolbar_zoom_in">
-                                <property name="visible">True</property>
-                                <property name="has_tooltip">True</property>
-                                <property name="tooltip" translatable="yes">Zoom in</property>
-                                <property name="stock_id">gtk-zoom-in</property>
-                                <signal name="clicked" handler="OnZoomIn"/>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                              </packing>
-                            </child>
-                          </widget>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="position">1</property>
+                            <property name="resize">True</property>
+                            <property name="shrink">True</property>
                           </packing>
                         </child>
                       </widget>
                       <packing>
-                        <property name="resize">True</property>
-                        <property name="shrink">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkToolbar" id="document_toolbar">
+                        <property name="visible">True</property>
+                        <child>
+                          <widget class="GtkToolButton" id="toolbar_prev_page">
+                            <property name="visible">True</property>
+                            <property name="has_tooltip">True</property>
+                            <property name="tooltip" translatable="yes">Go to Previous Page</property>
+                            <property name="stock_id">gtk-go-back</property>
+                            <signal name="clicked" handler="OnPreviousPage"/>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="homogeneous">True</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkToolButton" id="toolbar_next_page">
+                            <property name="visible">True</property>
+                            <property name="has_tooltip">True</property>
+                            <property name="tooltip" translatable="yes">Go to Next Page</property>
+                            <property name="stock_id">gtk-go-forward</property>
+                            <signal name="clicked" handler="OnNextPage"/>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="homogeneous">True</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkSeparatorToolItem" id="toolsep1">
+                            <property name="visible">True</property>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkToolButton" id="toolbar_zoom_out">
+                            <property name="visible">True</property>
+                            <property name="has_tooltip">True</property>
+                            <property name="tooltip" translatable="yes">Zoom Out</property>
+                            <property name="stock_id">gtk-zoom-out</property>
+                            <signal name="clicked" handler="OnZoomOut"/>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="homogeneous">True</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkToolItem" id="toolbar_scale_item">
+                            <property name="visible">True</property>
+                            <child>
+                              <widget class="GtkHScale" id="toolbar_scale_page">
+                                <property name="width_request">100</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="adjustment">1 0 5 0.050000000000000003 0.25 1</property>
+                                <property name="value_pos">right</property>
+                                <signal name="value_changed" handler="OnScalePageValueChanged"/>
+                                <signal name="format_value" handler="FormatZoomScaleValue"/>
+                              </widget>
+                            </child>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkToolButton" id="toolbar_zoom_in">
+                            <property name="visible">True</property>
+                            <property name="has_tooltip">True</property>
+                            <property name="tooltip" translatable="yes">Zoom In</property>
+                            <property name="stock_id">gtk-zoom-in</property>
+                            <signal name="clicked" handler="OnZoomIn"/>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="homogeneous">True</property>
+                          </packing>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                   </widget>
@@ -396,12 +400,23 @@
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkScrolledWindow" id="paper_information">
+                  <widget class="GtkVBox" id="paper_properties_vbox">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">automatic</property>
-                    <property name="vscrollbar_policy">automatic</property>
-                    <property name="shadow_type">in</property>
+                    <child>
+                      <widget class="GtkScrolledWindow" id="paper_properties_window">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="hscrollbar_policy">automatic</property>
+                        <property name="vscrollbar_policy">automatic</property>
+                        <property name="shadow_type">in</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
                     <child>
                       <placeholder/>
                     </child>

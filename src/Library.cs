@@ -62,6 +62,11 @@ namespace Papeles
 		{
 			Paper paper = new Paper (filename);
 
+			// FIXME Check for metadata
+			paper.Title = "Unknown";
+			paper.Authors = "Unknown";
+			paper.Journal = "Unknown";
+			paper.Year = "Unknown";
 			papers.Add (paper);
 			if (PaperAdded != null)
 				PaperAdded (paper);
@@ -90,5 +95,11 @@ namespace Papeles
 		{
 			return papers.Find ((paper => paper.ID == id)) == null;
 		}
+
+		public static Paper GetPaper (int id)
+		{
+			return papers.Find ((paper => paper.ID == id));
+		}
+
 	}
 }
