@@ -40,6 +40,12 @@ namespace Papeles
 		ID
     }
 
+	enum PaperPropertiesColumn {
+		Pixbuf,
+		FileName,
+		FilePath
+	}
+
     class MainWindow
     {
         [Glade.Widget] Window main_window;
@@ -54,7 +60,7 @@ namespace Papeles
 
 		Menu library_context_menu;
 		ListStore library_store;
-		ListStore properties_icon_store;
+		ListStore paper_properties_icon_store;
 		WebView paper_properties_web_view;
 		IconView paper_properties_icon_view;
 		RenderContext render_context;
@@ -158,15 +164,15 @@ namespace Papeles
 
 		void CreatePaperPropertiesView ()
 		{
-			properties_icon_store = new ListStore (typeof (Gdk.Pixbuf), typeof (string));
-			paper_properties_icon_view = new IconView (properties_icon_store);
+			paper_properties_icon_store = new ListStore (typeof (Gdk.Pixbuf), typeof (string), typeof (string));
+			paper_properties_icon_view = new IconView (paper_properties_icon_store);
 
-			paper_properties_icon_view.PixbufColumn = 0;
-			paper_properties_icon_view.TextColumn = 1;
-			paper_properties_icon_view.MarkupColumn = 1;
+			paper_properties_icon_view.PixbufColumn = (int) PaperPropertiesColumn.Pixbuf;
+			paper_properties_icon_view.TextColumn   = (int) PaperPropertiesColumn.FileName;
+			paper_properties_icon_view.MarkupColumn = (int) PaperPropertiesColumn.FileName;
 			paper_properties_icon_view.ItemWidth = 185;
 			paper_properties_icon_view.Orientation = Orientation.Horizontal;
-			// paper_properties_icon_view.ItemActivated += ;
+			paper_properties_icon_view.ItemActivated += OnPropertiesIconActivated;
 			paper_properties_frame_inner.Add (paper_properties_icon_view);
 
 			paper_properties_web_view = new WebView ();
@@ -221,11 +227,12 @@ namespace Papeles
 
 			// FIXME: get icon based on mime-type
 			Gdk.Pixbuf icon = IconTheme.Default.LoadIcon ("gnome-fs-regular", 32, (IconLookupFlags) 0);
-			properties_icon_store.Clear ();
-
 			string fileName = Path.GetFileName (paper.FilePath).Truncate (18, "...");
-			string label = String.Format ("<b>{0}</b>\n{1}", fileName, "2.8 MB");
-			properties_icon_store.AppendValues (icon, label);
+			string fileSize = "2.8 MB";
+			string label = String.Format ("<b>{0}</b>\n{1}", fileName, fileSize);
+
+			paper_properties_icon_store.Clear ();
+			paper_properties_icon_store.AppendValues (icon, label, paper.FilePath);
 		}
 
         public MainWindow ()
@@ -392,7 +399,7 @@ namespace Papeles
 
 		// Non-GTK widget callbacks
 
-		public void OnLibrarySelectedPaperChanged(object obj, EventArgs args)
+		public void OnLibrarySelectedPaperChanged (object obj, EventArgs args)
 		{
 			TreeSelection selection = obj as TreeSelection;
 
@@ -402,9 +409,21 @@ namespace Papeles
 				int id;
 
 				library_store.GetIter (out iter, path);
-				id = Convert.ToInt32(library_store.GetValue (iter, (int) Column.ID));
+				id = Convert.ToInt32(library_store.GetValue (iter, (int) Column.ID) as string);
 				ShowPaperInformation (Library.GetPaper (id));
 			}
+		}
+
+		public void OnPropertiesIconActivated (object obj, ItemActivatedArgs args)
+		{
+			TreeIter iter;
+			string path;
+
+			paper_properties_icon_store.GetIter (out iter, args.Path);
+			path = paper_properties_icon_store.GetValue (iter, (int) PaperPropertiesColumn.FilePath) as string;
+
+			// FIXME: xdg-open on Linux only
+			System.Diagnostics.Process.Start ("xdg-open", String.Format ("\"{0}\"", path));
 		}
 
 		public void AddPaperToLibraryStore (Paper paper)

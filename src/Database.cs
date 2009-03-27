@@ -28,25 +28,16 @@ namespace Papeles
 {
 	public static class Database
 	{
-		static IDbConnection conn;
-		static IDbCommand cmd;
+		static string data_source;
 
-		public static bool Open {
-			get { return conn.State == ConnectionState.Open; }
-		}
-
-		public static bool Closed {
-			get { return conn.State == ConnectionState.Closed; }
-		}
- 
 		public static void Load (string databaseFile)
 		{
-			string dataSource = String.Format ("Data Source={0}", databaseFile);
 			bool papersTableExists = false, versionTableExists = false;
 
-			conn = new SqliteConnection (dataSource);
+			data_source = String.Format ("Data Source={0}", databaseFile);
+
+			SqliteConnection conn = new SqliteConnection (data_source);
 			conn.Open ();
-			cmd = conn.CreateCommand ();
 
 			try {
 				DataTable tables = (conn as SqliteConnection).GetSchema ("tables");
@@ -62,34 +53,40 @@ namespace Papeles
 			} catch (ArgumentException) {
 				Console.WriteLine ("Unable to get table names from schema");
 			}
+			conn.Close ();
+
 			if (!papersTableExists)
-				Paper.CreateTable (cmd);
+				Paper.CreateTable ();
 			if (!versionTableExists)
 				CreateVersionTable ();
 		}
 
 		static void CreateVersionTable ()
 		{
-			cmd.CommandText = "CREATE TABLE IF NOT EXISTS version ( version TEXT )";
-			cmd.ExecuteNonQuery ();
-		}
-
-		public static void Close ()
-		{
-			if (!Closed)
-				conn.Close ();
+			Execute ("CREATE TABLE IF NOT EXISTS version ( version TEXT )");
 		}
 
 		public static void Execute (string command, Object obj, Dictionary<string, DbType> lookup)
 		{
+			SqliteConnection conn = new SqliteConnection (data_source);
+			SqliteCommand cmd;
+
+			conn.Open ();
+			cmd = conn.CreateCommand ();
+			cmd.CommandText = command;
+
 			try {
-				cmd.CommandText = command;
 				if (obj != null)
-					Database.AddParameters (obj, lookup);
+					Database.AddParameters (cmd, obj, lookup);
+				cmd.ExecuteNonQuery ();
 			} catch (KeyNotFoundException) {
 				Console.WriteLine ("Missing a parameter somewhere; not executing SQL statement");
+			} catch (Exception e) {
+				Console.WriteLine ("Exception occurred while executing query");
+				Console.WriteLine (e.StackTrace);
 			} finally {
-				cmd.ExecuteNonQuery ();
+				cmd.Dispose ();
+				conn.Dispose ();
 			}
 		}
 
@@ -100,15 +97,24 @@ namespace Papeles
 
 		public static object ExecuteScalar (string command, Object obj, Dictionary<string, DbType> lookup)
 		{
+			SqliteConnection conn = new SqliteConnection (data_source);
+			SqliteCommand cmd;
+
+			conn.Open ();
+			cmd = conn.CreateCommand ();
+			cmd.CommandText = command;
+
 			try {
-				cmd.CommandText = command;
 				if (obj != null)
-					Database.AddParameters (obj, lookup);
+					Database.AddParameters (cmd, obj, lookup);
+				return cmd.ExecuteScalar ();
 			} catch (KeyNotFoundException) {
 				Console.WriteLine ("Missing a parameter somewhere; not executing SQL statement");
-				return null;
+			} catch (Exception e) {
+				Console.WriteLine ("Exception occurred while executing query");
+				Console.WriteLine (e.StackTrace);
 			}
-			return cmd.ExecuteScalar ();
+			return null;
 		}
 
 		public static object ExecuteScalar (string command)
@@ -116,17 +122,30 @@ namespace Papeles
 			return ExecuteScalar (command, null, null);
 		}
 
-		public static IDataReader Query(string query)
+		public static DbDataReader Query(string query)
 		{
+			SqliteConnection conn = new SqliteConnection (data_source);
+			SqliteCommand cmd;
+			DbDataReader reader;
+
+			conn.Open ();
+			cmd = conn.CreateCommand ();
 			cmd.CommandText = query;
-			IDataReader reader = cmd.ExecuteReader ();
+
+			try {
+				reader = cmd.ExecuteReader ();
+			} catch (Exception e) {
+				Console.WriteLine ("Exception occurred while executing query");
+				Console.WriteLine (e.StackTrace);
+				return null;
+			}
 
 			if (!(reader as SqliteDataReader).HasRows)
 				return null;
 			return reader;
 		}
 
-		public static void AddParameters (Object obj, Dictionary<string, DbType> lookup)
+		public static void AddParameters (SqliteCommand cmd, Object obj, Dictionary<string, DbType> lookup)
 		{
 			foreach (PropertyInfo prop in obj.GetType ().GetProperties ()) {
 				SqliteParameter param = new SqliteParameter ();
@@ -138,35 +157,50 @@ namespace Papeles
 			}
 		}
 
-		public static void SetProperties (Object obj, IDataReader reader, Dictionary<string, DbType> lookup)
+		public static void SetProperties (Object obj, DbDataReader reader, Dictionary<string, DbType> lookup,
+										  Dictionary<string, string> property_map)
 		{
 			Type type = obj.GetType ();
-			String[] columns = new string [reader.FieldCount];
-			int columnNumber = 0;
 
-			reader.GetValues (columns);
-			foreach (string column in columns) {
-				PropertyInfo prop = type.GetProperty (column);
+			for (int columnNumber = 0; columnNumber < reader.VisibleFieldCount; columnNumber++) {
+				string column = reader.GetName (columnNumber);
+				PropertyInfo prop;
 
+				try {
+					prop = type.GetProperty (property_map [column]);
+				} catch (KeyNotFoundException) {
+					Console.WriteLine (String.Format ("No mapping to property from column {0}", column));
+					continue;
+				}
+				if (prop == null) {
+					Console.WriteLine (String.Format ("Unable to find property with name {0}", column));
+					continue;
+				}
 				if (reader.IsDBNull (columnNumber)) {
 					prop.SetValue (obj, null, null);
 					continue;
 				}
 
-				switch (lookup [column]) {
-				case DbType.String:
-					prop.SetValue (obj, reader.GetString (columnNumber), null);
-					break;
-				case DbType.Int32:
-					prop.SetValue (obj, reader.GetInt32 (columnNumber), null);
-					break;
-				case DbType.DateTime:
-					prop.SetValue (obj, reader.GetDateTime (columnNumber), null);
-					break;
-				default:
-					break;
+				try {
+					switch (lookup [column]) {
+					case DbType.String:
+						prop.SetValue (obj, reader.GetString (columnNumber), null);
+						break;
+					case DbType.Int32:
+						prop.SetValue (obj, reader.GetInt32 (columnNumber), null);
+						break;
+					case DbType.DateTime:
+						prop.SetValue (obj, reader.GetDateTime (columnNumber), null);
+						break;
+					case DbType.Boolean:
+						prop.SetValue (obj, reader.GetBoolean (columnNumber), null);
+						break;
+					default:
+						break;
+					}
+				} catch (KeyNotFoundException) {
+					Console.WriteLine (String.Format ("Attempted to look up invalid column '{0}'", column));
 				}
-				columnNumber++;
 			}
 		}
 	}

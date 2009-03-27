@@ -10,6 +10,7 @@ General:
  * Plugin framework using Mono.Addins.
  * Use GIO (gio-sharp) to get icon based on mime-type for right panel. It might be best to wait for
    GTK# 2.14 when it is stable.
+ * Drag'n'drop document importing.
 
 Import:
  * Import information from RIS files.

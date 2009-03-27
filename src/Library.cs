@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -45,16 +46,11 @@ namespace Papeles
 		}
 
 		/// <summary>
-		/// Load the library from the database. Database should obviously be
-		/// loaded first.
+		/// Load the library from the database.
 		/// </summary>
 		public static void Load ()
 		{
-			// Test if database is open here because this happens at initialization,
-			// so it's kind of subtle.
-			if (!Database.Open)
-				return; // FIXME: this should be an exception
-
+			Paper.Init ();
 			papers = Paper.All ();
 		}
 
@@ -67,7 +63,9 @@ namespace Papeles
 			paper.Authors = "Unknown";
 			paper.Journal = "Unknown";
 			paper.Year = "Unknown";
+			paper.Save ();
 			papers.Add (paper);
+			Console.WriteLine (String.Format ("Added paper with id {0} to database"));
 			if (PaperAdded != null)
 				PaperAdded (paper);
 		}

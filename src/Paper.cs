@@ -30,7 +30,9 @@ namespace Papeles
     /// </summary>
     public class Paper
     {
-		static Dictionary<string, DbType> lookup;
+		static Dictionary<string, DbType> properties_lookup;
+		static Dictionary<string, DbType> columns_lookup;
+		static Dictionary<string, string> column_property_map;
 
         public string   Authors { get; set; }
         public string   Uri { get; set; }
@@ -64,7 +66,7 @@ namespace Papeles
     @Authors, @Uri, @Doi, @Title, @Journal, @Volume, @Number, @Month, @Pages, @Year, @Abstract,
     @Notes, @CiteKey, @Keywords, @FilePath, @Rating, @Flagged, @ImportedAt, @ReadAt
 )";
-				Database.Execute (command, this, lookup);
+				Database.Execute (command, this, properties_lookup);
 				ID = Convert.ToInt32 (Database.ExecuteScalar ("SELECT last_insert_rowid()"));
 			} else {
 				string command =
@@ -75,21 +77,21 @@ namespace Papeles
     file_path = @FilePath, rating = @Rating, flagged = @Flagged,
     imported_at = @ImportedAt, read_at = @ReadAt
 WHERE ID = @ID";
-				Database.Execute (command, this, lookup);
+				Database.Execute (command, this, properties_lookup);
 			}
 		}
 
 		public void Load ()
 		{
 			string query = String.Format ("SELECT * FROM papers WHERE id = {0}", ID);
-			IDataReader reader = Database.Query (query);
+			DbDataReader reader = Database.Query (query);
 
 			if (reader == null) {
 				Console.WriteLine (String.Format ("Unable to find paper with id {0}", ID));
 				return;
 			}
 			reader.Read ();
-			Database.SetProperties (this, reader, lookup);
+			Database.SetProperties (this, reader, columns_lookup, column_property_map);
 			reader.Close ();
 		}
 
@@ -100,27 +102,29 @@ WHERE ID = @ID";
 
 		public Paper ()
 		{
-			if (lookup == null)
-				CreateLookupTable ();
 		}
 
 		public Paper (int id)
 		{
 			ID = id;
-			if (lookup == null)
-				CreateLookupTable ();
 		}
 
 		public Paper (string filename)
 		{
 			FilePath = filename;
-			if (lookup == null)
-				CreateLookupTable ();
 		}
 
-		public static void CreateTable(IDbCommand cmd)
+		public static void Init ()
 		{
-			cmd.CommandText =
+			CreateTable ();
+			CreatePropertiesLookupTable ();
+			CreateColumnsLookupTable ();
+			CreateColumnPropertyMap ();
+		}
+
+		public static void CreateTable ()
+		{
+			Database.Execute (
 @"CREATE TABLE IF NOT EXISTS papers (
     authors TEXT,
     uri TEXT,
@@ -142,14 +146,13 @@ WHERE ID = @ID";
     imported_at DATETIME,
     read_at DATETIME,
     id INTEGER PRIMARY KEY
-)";
-			cmd.ExecuteNonQuery ();
+)");
 		}
 
 		public static List<Paper> All ()
 		{
-			string query = "SELECT authors, title, journal, year, rating, flagged FROM papers";
-			IDataReader reader = Database.Query (query);
+			string query = "SELECT authors, title, journal, year, file_path, id FROM papers";
+			DbDataReader reader = Database.Query (query);
 			List<Paper> papers = new List<Paper> ();
 
 			if (reader == null) {
@@ -160,10 +163,10 @@ WHERE ID = @ID";
 			while (reader.Read ()) {
 				Paper paper = new Paper ();
 
-				Database.SetProperties (paper, reader, lookup);
-				reader.Close ();
+				Database.SetProperties (paper, reader, columns_lookup, column_property_map);
 				papers.Add (paper);
 			}
+			reader.Close ();
 			return papers;
 		}
 
@@ -171,7 +174,7 @@ WHERE ID = @ID";
 		{
 			string query = String.Format (
 "SELECT authors, title, journal, year, rating, flagged FROM papers WHERE id = {0}", id);
-			IDataReader reader = Database.Query (query);
+			DbDataReader reader = Database.Query (query);
 
 			if (reader == null) {
 				Console.WriteLine (String.Format ("Unable to find paper with id {0}", id));
@@ -179,33 +182,84 @@ WHERE ID = @ID";
 			}
 
 			Paper paper = new Paper ();
-			Database.SetProperties (paper, reader, lookup);
+			Database.SetProperties (paper, reader, columns_lookup, column_property_map);
 			return paper;
 		}
 
-		static void CreateLookupTable ()
+		static void CreatePropertiesLookupTable ()
 		{
-			lookup = new Dictionary<string, DbType> ();
-			lookup.Add ("Authors",    DbType.String);
-			lookup.Add ("Uri",        DbType.String);
-			lookup.Add ("Doi",        DbType.String);
-			lookup.Add ("Title",      DbType.String);
-			lookup.Add ("Journal",    DbType.String);
-			lookup.Add ("Volume",     DbType.String);
-			lookup.Add ("Number",     DbType.String);
-			lookup.Add ("Month",      DbType.String);
-			lookup.Add ("Pages",      DbType.String);
-			lookup.Add ("Year",       DbType.String);
-			lookup.Add ("Abstract",   DbType.String);
-			lookup.Add ("Notes",      DbType.String);
-			lookup.Add ("CiteKey",    DbType.String);
-			lookup.Add ("Keywords",   DbType.String);
-			lookup.Add ("FilePath",   DbType.String);
-			lookup.Add ("Rating",     DbType.Int32);
-			lookup.Add ("Flagged",    DbType.Int32);
-			lookup.Add ("ImportedAt", DbType.DateTime);
-			lookup.Add ("ReadAt",     DbType.DateTime);
-			lookup.Add ("ID",         DbType.Int32);
+			properties_lookup = new Dictionary<string, DbType> ();
+			properties_lookup.Add ("Authors",    DbType.String);
+			properties_lookup.Add ("Uri",        DbType.String);
+			properties_lookup.Add ("Doi",        DbType.String);
+			properties_lookup.Add ("Title",      DbType.String);
+			properties_lookup.Add ("Journal",    DbType.String);
+			properties_lookup.Add ("Volume",     DbType.String);
+			properties_lookup.Add ("Number",     DbType.String);
+			properties_lookup.Add ("Month",      DbType.String);
+			properties_lookup.Add ("Pages",      DbType.String);
+			properties_lookup.Add ("Year",       DbType.String);
+			properties_lookup.Add ("Abstract",   DbType.String);
+			properties_lookup.Add ("Notes",      DbType.String);
+			properties_lookup.Add ("CiteKey",    DbType.String);
+			properties_lookup.Add ("Keywords",   DbType.String);
+			properties_lookup.Add ("FilePath",   DbType.String);
+			properties_lookup.Add ("Rating",     DbType.Int32);
+			properties_lookup.Add ("Flagged",    DbType.Boolean); // FIXME: this will likely cause trouble
+			properties_lookup.Add ("ImportedAt", DbType.DateTime);
+			properties_lookup.Add ("ReadAt",     DbType.DateTime);
+			properties_lookup.Add ("ID",         DbType.Int32);
+		}
+
+		static void CreateColumnsLookupTable ()
+		{
+			columns_lookup = new Dictionary<string, DbType> ();
+			columns_lookup.Add ("authors",     DbType.String);
+			columns_lookup.Add ("uri",         DbType.String);
+			columns_lookup.Add ("doi",         DbType.String);
+			columns_lookup.Add ("title",       DbType.String);
+			columns_lookup.Add ("journal",     DbType.String);
+			columns_lookup.Add ("volume",      DbType.String);
+			columns_lookup.Add ("number",      DbType.String);
+			columns_lookup.Add ("month",       DbType.String);
+			columns_lookup.Add ("pages",       DbType.String);
+			columns_lookup.Add ("year",        DbType.String);
+			columns_lookup.Add ("abstract",    DbType.String);
+			columns_lookup.Add ("notes",       DbType.String);
+			columns_lookup.Add ("cite_key",    DbType.String);
+			columns_lookup.Add ("keywords",    DbType.String);
+			columns_lookup.Add ("file_path",   DbType.String);
+			columns_lookup.Add ("rating",      DbType.Int32);
+			columns_lookup.Add ("flagged",     DbType.Boolean);
+			columns_lookup.Add ("imported_at", DbType.DateTime);
+			columns_lookup.Add ("read_at",     DbType.DateTime);
+			columns_lookup.Add ("id",          DbType.Int32);
+		}
+
+		static void CreateColumnPropertyMap ()
+		{
+			// FIXME: generate automatically 
+			column_property_map = new Dictionary<string, string> ();
+			column_property_map.Add ("authors",     "Authors");
+			column_property_map.Add ("uri",         "Uri");
+			column_property_map.Add ("doi",         "Doi");
+			column_property_map.Add ("title",       "Title");
+			column_property_map.Add ("journal",     "Journal");
+			column_property_map.Add ("volume",      "Volume");
+			column_property_map.Add ("number",      "Number");
+			column_property_map.Add ("month",       "Month");
+			column_property_map.Add ("pages",       "Pages");
+			column_property_map.Add ("year",        "Year");
+			column_property_map.Add ("abstract",    "Abstract");
+			column_property_map.Add ("notes",       "Notes");
+			column_property_map.Add ("cite_key",    "CiteKey");
+			column_property_map.Add ("keywords",    "Keywords");
+			column_property_map.Add ("file_path",   "FilePath");
+			column_property_map.Add ("rating",      "Rating");
+			column_property_map.Add ("flagged",     "Flagged");
+			column_property_map.Add ("imported_at", "ImportedAt");
+			column_property_map.Add ("read_at",     "ReadAt");
+			column_property_map.Add ("id",          "ID");
 		}
     }
 
