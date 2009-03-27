@@ -18,12 +18,14 @@
  */
 
 using Banshee.Base;
+using Banshee.Widgets;
 using Commons.Collections;
 using Gtk;
 using NVelocity;
 using NVelocity.App;
 using NVelocity.Context;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using WebKit;
@@ -230,6 +232,68 @@ namespace Papeles
 			paper_properties_icon_view.TooltipText = fileName;
 		}
 
+		/// <summary>
+		/// Return ID of first selected paper.
+		/// </summary>
+		int GetSelectedPaperId ()
+		{
+			TreeSelection selection = document_treeview.Selection;
+
+			if (selection.CountSelectedRows () > 0) {
+				TreePath path = selection.GetSelectedRows ()[0];
+				TreeIter iter;
+
+				library_store.GetIter (out iter, path);
+				return Convert.ToInt32(library_store.GetValue (iter, (int) Column.ID) as string);
+			}
+			return 0;
+		}
+
+		/// <summary>
+		/// Return list of IDs of currently selected papers.
+		/// </summary>
+		List<int> GetSelectedPaperIds ()
+		{
+			List<int> selected = new List<int> ();
+			TreeSelection selection = document_treeview.Selection;
+
+			if (selection.CountSelectedRows () > 0) {
+				TreePath[] paths = selection.GetSelectedRows ();
+
+				foreach (TreePath path in paths) {
+					TreeIter iter;
+
+					library_store.GetIter (out iter, path);
+					selected.Add (Convert.ToInt32(library_store.GetValue (iter, (int) Column.ID) as string));
+				}
+			}
+			return selected;
+		}
+
+		delegate void ProcessPaper (int id);
+
+		void RemoveSelectedItems (ProcessPaper callback)
+		{
+			TreeSelection selection = document_treeview.Selection;
+
+			if (selection.CountSelectedRows () > 0) {
+				TreePath[] paths = selection.GetSelectedRows ();
+
+				foreach (TreePath path in paths) {
+					TreeIter iter;
+					int id;
+
+					library_store.GetIter (out iter, path);
+					id = Convert.ToInt32(library_store.GetValue (iter, (int) Column.ID) as string);
+					library_store.Remove (ref iter);
+					if (callback != null)
+						callback (id);
+				}
+			}
+			statusbar.Push (1, String.Format ("{0} papers", Library.Count));
+		}
+
+
 		public MainWindow ()
 		{
 			Glade.XML gxml = new Glade.XML (null, "papeles.glade", "main_window", null);
@@ -251,8 +315,7 @@ namespace Papeles
 			Database.Load (Path.Combine (data_dir, "papeles.db3"));
 			Library.Load ();
 
-			Library.PaperAdded   += AddPaperToLibraryStore;
-			Library.PaperRemoved += RemovePaperFromLibraryStore;
+			Library.PaperAdded += AddPaperToLibraryStore;
       
 			CreateDocumentTreeViewContextMenu ();
 			CreateLibraryStore ();
@@ -309,28 +372,52 @@ namespace Papeles
 
 		public void OnEditDocumentInformation (object obj, EventArgs args)
 		{
-			TreeSelection selection = document_treeview.Selection;
+			int id = GetSelectedPaperId ();
 
-			if (selection.CountSelectedRows () == 1) {
-				TreePath path = selection.GetSelectedRows ()[0];
-				TreeIter iter;
-				int id;
-
-				library_store.GetIter (out iter, path);
-				id = Convert.ToInt32(library_store.GetValue (iter, (int) Column.ID) as string);
-
+			if (id != 0)
 				new EditPaperInformationDialog (Library.GetPaper (id));
-			}
+			else
+				Console.WriteLine ("Editing paper: selected paper has an invalid ID");
 		}
 
 		public void OnEditRemoveFromLibrary (object obj, EventArgs args)
 		{
-			Console.WriteLine("Remove from library");
+			// FIXME: abstract this
+			// FIXME: test if more than one is selected, and updated text accordingly
+			string header = "Remove this item?";
+			string message = "Are you sure you want to remove the selected item from your library?";
+			HigMessageDialog dialog = new HigMessageDialog (main_window, DialogFlags.DestroyWithParent, MessageType.Warning,
+															ButtonsType.None, header, message);
+
+			dialog.AddButton ("gtk-cancel", ResponseType.No, true);
+			dialog.AddButton ("gtk-remove", ResponseType.Yes, false);
+
+			try {
+				if (ResponseType.Yes == (ResponseType) dialog.Run ())
+					RemoveSelectedItems (paperId => Library.Remove (paperId));
+			} finally {
+				dialog.Destroy ();
+			}
 		}
 
 		public void OnEditDeleteFromDrive (object obj, EventArgs args)
 		{
-			Console.WriteLine("Delete from drive");
+			// FIXME: abstract this
+			// FIXME: test if more than one is selected, and updated text accordingly
+			string header = "Delete this item?";
+			string message = "Are you sure you want to permanently delete the selected item? If deleted, it will be permanently lost.";
+			HigMessageDialog dialog = new HigMessageDialog (main_window, DialogFlags.DestroyWithParent, MessageType.Warning,
+															ButtonsType.None, header, message);
+
+			dialog.AddButton ("gtk-cancel", ResponseType.No, true);
+			dialog.AddButton ("gtk-delete", ResponseType.Yes, false);
+
+			try {
+				if (ResponseType.Yes == (ResponseType) dialog.Run ())
+					RemoveSelectedItems (paperId => Library.Delete (paperId));
+			} finally {
+				dialog.Destroy ();
+			}
 		}
 
 		public void OnEditPreferences (object obj, EventArgs args)
@@ -400,19 +487,16 @@ namespace Papeles
 
 		public void OnLibrarySelectedPaperChanged (object obj, EventArgs args)
 		{
-			TreeSelection selection = obj as TreeSelection;
+			int id = GetSelectedPaperId ();
 
-			if (selection.CountSelectedRows () == 1) {
-				TreePath path = selection.GetSelectedRows ()[0];
-				TreeIter iter;
-				Paper paper;
-				int id;
+			if (id != 0) {
+				Paper paper = Library.GetPaper (id);
 
-				library_store.GetIter (out iter, path);
-				id = Convert.ToInt32(library_store.GetValue (iter, (int) Column.ID) as string);
-				paper = Library.GetPaper (id);
 				ShowPaperInformation (paper);
 				DisplayDocument (paper.FilePath);
+			} else {
+				// FIXME: execution arrives here on startup... why?
+				Console.WriteLine ("Selected paper has an invalid ID");
 			}
 		}
 
@@ -431,11 +515,6 @@ namespace Papeles
 		public void AddPaperToLibraryStore (Paper paper)
 		{
 			library_store.AppendValues (paper.Authors, paper.Title, paper.Journal, paper.Year, Convert.ToString(paper.ID));
-			statusbar.Push (1, String.Format ("{0} papers", Library.Count));
-		}
-
-		public void RemovePaperFromLibraryStore (Paper paper)
-		{
 			statusbar.Push (1, String.Format ("{0} papers", Library.Count));
 		}
 	}

@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Papeles
@@ -33,6 +34,7 @@ namespace Papeles
 
 		public static PaperAddedHandler PaperAdded;
 		public static PaperRemovedHandler PaperRemoved;
+		public static PaperRemovedHandler PaperDeleted;
 
 		/// <summary>
 		/// Get the number of papers in the library.
@@ -84,8 +86,35 @@ namespace Papeles
 			SavePaper save = p => { paper = p; return true; };
 
 			papers.RemoveAll (p => p.ID == id && save (p));
-			if (paper != null && PaperRemoved != null)
-				PaperRemoved (paper);
+			if (paper == null)
+				return;
+
+			try {
+				// FIXME: ensure event handlers do not alter the paper
+				if (PaperRemoved != null)
+					PaperRemoved (paper);
+			} finally {
+				paper.Delete ();
+			}
+		}
+
+		public static void Delete (int id)
+		{
+			Paper paper = GetPaper (id);
+
+			if (paper == null)
+				return;
+
+			papers.Remove (paper);
+
+			try {
+				// FIXME: ensure event handlers do not alter the paper
+				if (PaperDeleted != null)
+					PaperDeleted (paper);
+			} finally {
+				File.Delete (paper.FilePath);
+				paper.Delete ();
+			}
 		}
 
 		public static bool Contains (int id)
