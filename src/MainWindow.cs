@@ -30,15 +30,15 @@ using WebKit;
 
 namespace Papeles
 {
-    enum Column {
-        //Flag,
-        Authors,
-        Title,
-        Journal,
-        Year,
-        //Rating,
+	enum Column {
+		//Flag,
+		Authors,
+		Title,
+		Journal,
+		Year,
+		//Rating,
 		ID
-    }
+	}
 
 	enum PaperPropertiesColumn {
 		Pixbuf,
@@ -46,17 +46,17 @@ namespace Papeles
 		FilePath
 	}
 
-    class MainWindow
-    {
-        [Glade.Widget] Window main_window;
-        [Glade.Widget] Viewport document_viewport;
-        [Glade.Widget] Toolbar main_toolbar;
-        [Glade.Widget] Toolbar document_toolbar;
-        [Glade.Widget] TreeView document_treeview;
-        [Glade.Widget] HScale toolbar_scale_page;
+	class MainWindow
+	{
+		[Glade.Widget] Window main_window;
+		[Glade.Widget] Viewport document_viewport;
+		[Glade.Widget] Toolbar main_toolbar;
+		[Glade.Widget] Toolbar document_toolbar;
+		[Glade.Widget] TreeView document_treeview;
+		[Glade.Widget] HScale toolbar_scale_page;
 		[Glade.Widget] ScrolledWindow paper_properties_window;
 		[Glade.Widget] Alignment paper_properties_frame_inner;
-        [Glade.Widget] Statusbar statusbar;
+		[Glade.Widget] Statusbar statusbar;
 
 		Menu library_context_menu;
 		ListStore library_store;
@@ -92,63 +92,63 @@ namespace Papeles
 
 		void CreateLibraryStore ()
 		{
-            library_store = new ListStore (typeof(string), typeof(string), typeof(string), typeof(string),
-										   typeof(string));
+			library_store = new ListStore (typeof(string), typeof(string), typeof(string), typeof(string),
+						       typeof(string));
 
 			foreach (Paper paper in Library.Papers)
 				AddPaperToLibraryStore (paper);
 		}
 
-        /// <summary>
-        /// Populate headers in treeview for library.
-        /// </summary>
-        void CreateLibraryView ()
-        {
-            // TreeViewColumn flagColumn    = new TreeViewColumn ("Flag",    new CellRendererText (),
+		/// <summary>
+		/// Populate headers in treeview for library.
+		/// </summary>
+		void CreateLibraryView ()
+		{
+			// TreeViewColumn flagColumn    = new TreeViewColumn ("Flag",    new CellRendererText (),
 			// 												   "text",    Column.Flag);
-            TreeViewColumn authorsColumn = new TreeViewColumn ("Authors", new CellRendererText (),
-															   "text",    Column.Authors);
-            TreeViewColumn titleColumn   = new TreeViewColumn ("Title",   new CellRendererText (),
-															   "text",    Column.Title);
-            TreeViewColumn journalColumn = new TreeViewColumn ("Journal", new CellRendererText (),
-															   "text",    Column.Journal);
-            TreeViewColumn yearColumn    = new TreeViewColumn ("Year",    new CellRendererText (),
-															   "text",    Column.Year);
-            TreeViewColumn idColumn      = new TreeViewColumn ("ID",      new CellRendererText (),
-															   "text",    Column.ID);
-            // TreeViewColumn ratingColumn  = new TreeViewColumn ("Rating",  new CellRendererText (),
+			TreeViewColumn authorsColumn = new TreeViewColumn ("Authors", new CellRendererText (),
+									   "text",    Column.Authors);
+			TreeViewColumn titleColumn   = new TreeViewColumn ("Title",   new CellRendererText (),
+									   "text",    Column.Title);
+			TreeViewColumn journalColumn = new TreeViewColumn ("Journal", new CellRendererText (),
+									   "text",    Column.Journal);
+			TreeViewColumn yearColumn    = new TreeViewColumn ("Year",    new CellRendererText (),
+									   "text",    Column.Year);
+			TreeViewColumn idColumn      = new TreeViewColumn ("ID",      new CellRendererText (),
+									   "text",    Column.ID);
+			// TreeViewColumn ratingColumn  = new TreeViewColumn ("Rating",  new CellRendererText (),
 			// 												   "text",    Column.Rating);
 
 			idColumn.Visible = false;
 
-            authorsColumn.SortColumnId = (int) Column.Authors;
-            titleColumn.SortColumnId   = (int) Column.Title;
-            journalColumn.SortColumnId = (int) Column.Journal;
-            yearColumn.SortColumnId    = (int) Column.Year;
-            // ratingColumn.SortColumnId  = (int) Column.Rating;
+			authorsColumn.SortColumnId = (int) Column.Authors;
+			titleColumn.SortColumnId   = (int) Column.Title;
+			journalColumn.SortColumnId = (int) Column.Journal;
+			yearColumn.SortColumnId    = (int) Column.Year;
+			// ratingColumn.SortColumnId  = (int) Column.Rating;
 
-            authorsColumn.Expand = true;
-            titleColumn.Expand   = true;
-            journalColumn.Expand = true;
-            yearColumn.Expand    = true;
-            // ratingColumn.Expand  = true;
+			authorsColumn.Expand = true;
+			titleColumn.Expand   = true;
+			journalColumn.Expand = true;
+			yearColumn.Expand    = true;
+			// ratingColumn.Expand  = true;
 
-            authorsColumn.Resizable = true;
-            titleColumn.Resizable   = true;
-            journalColumn.Resizable = true;
-            yearColumn.Resizable    = true;
+			authorsColumn.Resizable = true;
+			titleColumn.Resizable   = true;
+			journalColumn.Resizable = true;
+			yearColumn.Resizable    = true;
 
-            // document_treeview.AppendColumn (flagColumn);
-            document_treeview.AppendColumn (authorsColumn);
-            document_treeview.AppendColumn (titleColumn);
-            document_treeview.AppendColumn (journalColumn);
-            document_treeview.AppendColumn (yearColumn);
-            // document_treeview.AppendColumn (ratingColumn);
+			// document_treeview.AppendColumn (flagColumn);
+			document_treeview.AppendColumn (authorsColumn);
+			document_treeview.AppendColumn (titleColumn);
+			document_treeview.AppendColumn (journalColumn);
+			document_treeview.AppendColumn (yearColumn);
+			// document_treeview.AppendColumn (ratingColumn);
 
-            document_treeview.Selection.Mode = SelectionMode.Multiple;
+			document_treeview.Selection.Mode = SelectionMode.Multiple;
 			document_treeview.Selection.Changed += OnLibrarySelectedPaperChanged;
-            document_treeview.Model = library_store;
-        }
+			document_treeview.Model = library_store;
+		}
 
 		void CreateTemplateEngine ()
 		{
@@ -181,7 +181,7 @@ namespace Papeles
 
 		void DisplayDocument (string filePath)
 		{
-            IDocument doc = new PdfDocument ("file://" + filePath, "");
+			IDocument doc = new PdfDocument ("file://" + filePath, "");
 			Box box = new VBox (true, 0);
 			Gdk.Color white = new Gdk.Color (0xFF, 0xFF, 0xFF);
 
@@ -199,9 +199,9 @@ namespace Papeles
 		}
 
 		void QuitApplication ()
-        {
-            Application.Quit ();
-        }
+		{
+			Application.Quit ();
+		}
 
 		void ShowDocumentTreeViewContextMenu ()
 		{
@@ -230,11 +230,11 @@ namespace Papeles
 			paper_properties_icon_view.TooltipText = fileName;
 		}
 
-        public MainWindow ()
-        {
-            Glade.XML gxml = new Glade.XML (null, "papeles.glade", "main_window", null);
+		public MainWindow ()
+		{
+			Glade.XML gxml = new Glade.XML (null, "papeles.glade", "main_window", null);
 
-            gxml.Autoconnect (this);
+			gxml.Autoconnect (this);
 
 			config_dir    = XdgBaseDirectorySpec.GetUserDirectory ("XDG_CONFIG_HOME", ".config");
 			data_dir      = XdgBaseDirectorySpec.GetUserDirectory ("XDG_DATA_HOME", ".local/share");
@@ -248,7 +248,7 @@ namespace Papeles
 			if (!Directory.Exists (data_dir))
 				Directory.CreateDirectory (data_dir);
 
-            Database.Load (Path.Combine (data_dir, "papeles.db3"));
+			Database.Load (Path.Combine (data_dir, "papeles.db3"));
 			Library.Load ();
 
 			Library.PaperAdded   += AddPaperToLibraryStore;
@@ -256,121 +256,121 @@ namespace Papeles
       
 			CreateDocumentTreeViewContextMenu ();
 			CreateLibraryStore ();
-            CreateLibraryView ();
+			CreateLibraryView ();
 			CreateTemplateEngine ();
 			CreatePaperPropertiesView ();
 
-            statusbar.Push (1, String.Format ("{0} papers", Library.Count));
+			statusbar.Push (1, String.Format ("{0} papers", Library.Count));
 
-            main_toolbar.IconSize     = IconSize.SmallToolbar;
-            document_toolbar.IconSize = IconSize.SmallToolbar;
+			main_toolbar.IconSize     = IconSize.SmallToolbar;
+			document_toolbar.IconSize = IconSize.SmallToolbar;
 
 			main_window.Title = "Papeles";
-            main_window.ShowAll ();
-        }
+			main_window.ShowAll ();
+		}
 
-        // Event handlers
+		// Event handlers
 
-        public void OnDelete (object obj, DeleteEventArgs args)
-        {
-            QuitApplication ();
-        }
+		public void OnDelete (object obj, DeleteEventArgs args)
+		{
+			QuitApplication ();
+		}
 
-        public void OnFileImportDocument (object obj, EventArgs args)
-        {
-            FileChooserDialog dialog = new FileChooserDialog ("Import", null, FileChooserAction.Open,
-															  "Cancel", ResponseType.Cancel,
-															  "Import", ResponseType.Accept);
-            FileFilter filter = new FileFilter ();
+		public void OnFileImportDocument (object obj, EventArgs args)
+		{
+			FileChooserDialog dialog = new FileChooserDialog ("Import", null, FileChooserAction.Open,
+									  "Cancel", ResponseType.Cancel,
+									  "Import", ResponseType.Accept);
+			FileFilter filter = new FileFilter ();
 
-            filter.Name = "Documents";
-            filter.AddMimeType ("application/pdf");
-            filter.AddPattern ("*.pdf");
-            // filter.AddMimeType ("application/postscript");
-            // filter.AddPattern ("*.ps");
-            dialog.AddFilter (filter);
+			filter.Name = "Documents";
+			filter.AddMimeType ("application/pdf");
+			filter.AddPattern ("*.pdf");
+			// filter.AddMimeType ("application/postscript");
+			// filter.AddPattern ("*.ps");
+			dialog.AddFilter (filter);
 
-            if (dialog.Run () == (int) ResponseType.Accept)
+			if (dialog.Run () == (int) ResponseType.Accept)
 				Library.Add (dialog.Filename);
-            dialog.Destroy ();
-        }
+			dialog.Destroy ();
+		}
 
-        public void OnFilePrint (object obj, EventArgs args)
-        {
-        }
+		public void OnFilePrint (object obj, EventArgs args)
+		{
+		}
 
-        public void OnFileQuit (object obj, EventArgs args)
-        {
-            QuitApplication ();
-        }
+		public void OnFileQuit (object obj, EventArgs args)
+		{
+			QuitApplication ();
+		}
 
-        public void OnEditSelectAll (object obj, EventArgs args)
-        {
-        }
+		public void OnEditSelectAll (object obj, EventArgs args)
+		{
+		}
 
-        public void OnEditDocumentInformation (object obj, EventArgs args)
-        {
+		public void OnEditDocumentInformation (object obj, EventArgs args)
+		{
 			Console.WriteLine("Edit document information");
-        }
+		}
 
-        public void OnEditRemoveFromLibrary (object obj, EventArgs args)
-        {
+		public void OnEditRemoveFromLibrary (object obj, EventArgs args)
+		{
 			Console.WriteLine("Remove from library");
-        }
+		}
 
-        public void OnEditDeleteFromDrive (object obj, EventArgs args)
-        {
+		public void OnEditDeleteFromDrive (object obj, EventArgs args)
+		{
 			Console.WriteLine("Delete from drive");
-        }
+		}
 
-        public void OnEditProperties (object obj, EventArgs args)
-        {
-        }
+		public void OnEditProperties (object obj, EventArgs args)
+		{
+		}
 
-        public void OnEditPreferences (object obj, EventArgs args)
-        {
-        }
+		public void OnEditPreferences (object obj, EventArgs args)
+		{
+		}
 
-        public void OnHelpAbout (object obj, EventArgs args)
-        {
-            AboutDialog dialog = new AboutDialog ();
+		public void OnHelpAbout (object obj, EventArgs args)
+		{
+			AboutDialog dialog = new AboutDialog ();
 
-            dialog.ProgramName = "Papeles";
-            dialog.Version = "0.1";
-            dialog.Copyright = "Copyright \u00a9 2009 Jacinto Shy, Jr.";
-            dialog.Run (); // TODO: don't block
-            dialog.Destroy ();
-        }
+			dialog.ProgramName = "Papeles";
+			dialog.Version = "0.1";
+			dialog.Copyright = "Copyright \u00a9 2009 Jacinto Shy, Jr.";
+			dialog.Run (); // TODO: don't block
+			dialog.Destroy ();
+		}
 
-        public void OnPreviousPage (object obj, EventArgs args)
-        {
-        }
+		public void OnPreviousPage (object obj, EventArgs args)
+		{
+		}
 
-        public void OnNextPage (object obj, EventArgs args)
-        {
-        }
+		public void OnNextPage (object obj, EventArgs args)
+		{
+		}
 
-        public void OnZoomOut (object obj, EventArgs args)
-        {
-            Adjustment adj = toolbar_scale_page.Adjustment;
+		public void OnZoomOut (object obj, EventArgs args)
+		{
+			Adjustment adj = toolbar_scale_page.Adjustment;
 
-            if (toolbar_scale_page.Value - adj.PageIncrement >= adj.Lower)
-                toolbar_scale_page.Value -= adj.PageIncrement;
-        }
+			if (toolbar_scale_page.Value - adj.PageIncrement >= adj.Lower)
+				toolbar_scale_page.Value -= adj.PageIncrement;
+		}
 
-        public void OnZoomIn (object obj, EventArgs args)
-        {
-            Adjustment adj = toolbar_scale_page.Adjustment;
+		public void OnZoomIn (object obj, EventArgs args)
+		{
+			Adjustment adj = toolbar_scale_page.Adjustment;
 
-            if (toolbar_scale_page.Value + adj.PageIncrement <= adj.Upper)
-                toolbar_scale_page.Value += adj.PageIncrement;
-        }
+			if (toolbar_scale_page.Value + adj.PageIncrement <= adj.Upper)
+				toolbar_scale_page.Value += adj.PageIncrement;
+		}
 
-        public void OnScalePageValueChanged (object obj, EventArgs args)
-        {
+		public void OnScalePageValueChanged (object obj, EventArgs args)
+		{
 			render_context.Scale = toolbar_scale_page.Value;
 			document_viewport.QueueDraw ();
-        }
+		}
 
 		public void FormatZoomScaleValue (object obj, FormatValueArgs args)
 		{
@@ -432,5 +432,5 @@ namespace Papeles
 		{
 			statusbar.Push (1, String.Format ("{0} papers", Library.Count));
 		}
-    }
+	}
 }

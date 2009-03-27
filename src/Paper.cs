@@ -25,35 +25,35 @@ using Mono.Data.Sqlite;
 
 namespace Papeles
 {
-    /// <summary>
-    /// Schema for a paper in the library.
-    /// </summary>
-    public class Paper
-    {
+	/// <summary>
+	/// Schema for a paper in the library.
+	/// </summary>
+	public class Paper
+	{
 		static Dictionary<string, DbType> properties_lookup;
 		static Dictionary<string, DbType> columns_lookup;
 		static Dictionary<string, string> column_property_map;
 
-        public string   Authors { get; set; }
-        public string   Uri { get; set; }
-        public string   Doi { get; set; }
-        public string   Title { get; set; }
-        public string   Journal { get; set; }
-        public string   Volume { get; set; }
-        public string   Number { get; set; }
-        public string   Month { get; set; } 
-        public string   Pages { get; set; }
-        public string   Year { get; set; }
-        public string   Abstract { get; set; }
-        public string   Notes { get; set; }
-        public string   CiteKey { get; set; }
-        public string   Keywords { get; set; }
-        public string   FilePath { get; set; }
-        public int      Rating { get; set; }
-        public bool     Flagged { get; set; }
-        public DateTime ImportedAt { get; set; }
-        public DateTime ReadAt { get; set;} 
-        public int      ID { get; set; }
+		public string   Authors { get; set; }
+		public string   Uri { get; set; }
+		public string   Doi { get; set; }
+		public string   Title { get; set; }
+		public string   Journal { get; set; }
+		public string   Volume { get; set; }
+		public string   Number { get; set; }
+		public string   Month { get; set; } 
+		public string   Pages { get; set; }
+		public string   Year { get; set; }
+		public string   Abstract { get; set; }
+		public string   Notes { get; set; }
+		public string   CiteKey { get; set; }
+		public string   Keywords { get; set; }
+		public string   FilePath { get; set; }
+		public int      Rating { get; set; }
+		public bool     Flagged { get; set; }
+		public DateTime ImportedAt { get; set; }
+		public DateTime ReadAt { get; set;} 
+		public int      ID { get; set; }
 
 		public void Save ()
 		{
@@ -172,7 +172,7 @@ WHERE ID = @ID";
 		public static Paper FindById (int id)
 		{
 			string query = String.Format (
-"SELECT authors, title, journal, year, rating, flagged FROM papers WHERE id = {0}", id);
+						      "SELECT authors, title, journal, year, rating, flagged FROM papers WHERE id = {0}", id);
 			DbDataReader reader = Database.Query (query);
 
 			if (reader == null) {
@@ -260,7 +260,7 @@ WHERE ID = @ID";
 			column_property_map.Add ("read_at",     "ReadAt");
 			column_property_map.Add ("id",          "ID");
 		}
-    }
+	}
 
 	class PaperComparer : IEqualityComparer<Paper>
 	{

@@ -19,18 +19,18 @@
 
 namespace Papeles
 {
-    public class PapelesApp
-    {
-        public static void Main (string[] args)
-        {
-            new PapelesApp ();
-        }
+	public class PapelesApp
+	{
+		public static void Main (string[] args)
+		{
+			new PapelesApp ();
+		}
 
-        public PapelesApp ()
-        {
-            Gtk.Application.Init ();
-            new MainWindow ();
-            Gtk.Application.Run ();
-        }
-    }
+		public PapelesApp ()
+		{
+			Gtk.Application.Init ();
+			new MainWindow ();
+			Gtk.Application.Run ();
+		}
+	}
 }

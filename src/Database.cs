@@ -158,7 +158,7 @@ namespace Papeles
 		}
 
 		public static void SetProperties (Object obj, DbDataReader reader, Dictionary<string, DbType> lookup,
-										  Dictionary<string, string> property_map)
+						  Dictionary<string, string> property_map)
 		{
 			Type type = obj.GetType ();
 

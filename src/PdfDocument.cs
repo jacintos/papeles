@@ -60,10 +60,10 @@ namespace Papeles
 		}
 
 		public PdfDocument (string uri, string password)
-		{
-			Password = password;
-			Load (uri);
-		}
+			{
+				Password = password;
+				Load (uri);
+			}
 
 		public void Load (string uri)
 		{
