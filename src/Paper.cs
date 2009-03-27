@@ -116,7 +116,6 @@ WHERE ID = @ID";
 
 		public static void Init ()
 		{
-			CreateTable ();
 			CreatePropertiesLookupTable ();
 			CreateColumnsLookupTable ();
 			CreateColumnPropertyMap ();

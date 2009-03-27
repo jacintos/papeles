@@ -65,7 +65,6 @@ namespace Papeles
 			paper.Year = "Unknown";
 			paper.Save ();
 			papers.Add (paper);
-			Console.WriteLine (String.Format ("Added paper with id {0} to database"));
 			if (PaperAdded != null)
 				PaperAdded (paper);
 		}

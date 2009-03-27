@@ -179,25 +179,24 @@ namespace Papeles
 			paper_properties_window.Add (paper_properties_web_view);
 		}
 
-        void DisplayDocument (string filePath)
-        {
+		void DisplayDocument (string filePath)
+		{
             IDocument doc = new PdfDocument ("file://" + filePath, "");
-            DocumentInfo info = doc.Info;
+			Box box = new VBox (true, 0);
+			Gdk.Color white = new Gdk.Color (0xFF, 0xFF, 0xFF);
 
-			render_context = new RenderContext(0, 1.0);
+			render_context = new RenderContext (0, 1.0);
+			for (int i = 0; i < doc.NPages; i++) {
+				RenderedDocument page = new RenderedDocument (i, render_context, doc);
 
-            Box box = new VBox (true, 0);
-
-            Gdk.Color white = new Gdk.Color (0xFF, 0xFF, 0xFF);
-            for (int i = 0; i < doc.NPages; i++) {
-                RenderedDocument page = new RenderedDocument (i, render_context, doc);
-
-                page.ModifyBg (StateType.Normal, white);
-                box.Add (page);
-            }
-
-            document_viewport.Add (box);
-        }
+				page.ModifyBg (StateType.Normal, white); // FIXME: probably don't want this
+				box.Add (page);
+				page.Show ();
+			}
+			document_viewport.Foreach (document_viewport.Remove);
+			document_viewport.Add (box);
+			box.Show ();
+		}
 
 		void QuitApplication ()
         {
@@ -261,12 +260,9 @@ namespace Papeles
 			CreateTemplateEngine ();
 			CreatePaperPropertiesView ();
 
-            DisplayDocument ("/home/jacinto/Documents/papers/inference-secco08.pdf");
+            statusbar.Push (1, String.Format ("{0} papers", Library.Count));
 
-            int totalPapers = Library.Count;
-            statusbar.Push (1, String.Format ("{0} papers", totalPapers));
-
-            main_toolbar.IconSize = IconSize.SmallToolbar;
+            main_toolbar.IconSize     = IconSize.SmallToolbar;
             document_toolbar.IconSize = IconSize.SmallToolbar;
 
 			main_window.Title = "Papeles";
@@ -403,11 +399,14 @@ namespace Papeles
 			if (selection.CountSelectedRows () == 1) {
 				TreePath path = selection.GetSelectedRows ()[0];
 				TreeIter iter;
+				Paper paper;
 				int id;
 
 				library_store.GetIter (out iter, path);
 				id = Convert.ToInt32(library_store.GetValue (iter, (int) Column.ID) as string);
-				ShowPaperInformation (Library.GetPaper (id));
+				paper = Library.GetPaper (id);
+				ShowPaperInformation (paper);
+				DisplayDocument (paper.FilePath);
 			}
 		}
 
@@ -426,10 +425,12 @@ namespace Papeles
 		public void AddPaperToLibraryStore (Paper paper)
 		{
 			library_store.AppendValues (paper.Authors, paper.Title, paper.Journal, paper.Year, Convert.ToString(paper.ID));
+			statusbar.Push (1, String.Format ("{0} papers", Library.Count));
 		}
 
 		public void RemovePaperFromLibraryStore (Paper paper)
 		{
+			statusbar.Push (1, String.Format ("{0} papers", Library.Count));
 		}
     }
 }
