@@ -186,11 +186,6 @@ namespace Papeles
 
 			render_context = new RenderContext(0, 1.0);
 
-            if (info.Title == null || info.Title == "")
-                main_window.Title = System.IO.Path.GetFileName (filePath);
-            else
-                main_window.Title = info.Title;
-
             Box box = new VBox (true, 0);
 
             Gdk.Color white = new Gdk.Color (0xFF, 0xFF, 0xFF);
@@ -227,12 +222,13 @@ namespace Papeles
 
 			// FIXME: get icon based on mime-type
 			Gdk.Pixbuf icon = IconTheme.Default.LoadIcon ("gnome-fs-regular", 32, (IconLookupFlags) 0);
-			string fileName = Path.GetFileName (paper.FilePath).Truncate (18, "...");
+			string fileName = Path.GetFileName (paper.FilePath);
 			string fileSize = "2.8 MB";
-			string label = String.Format ("<b>{0}</b>\n{1}", fileName, fileSize);
+			string label = String.Format ("<b>{0}</b>\n{1}", fileName.Truncate (18, "..."), fileSize);
 
 			paper_properties_icon_store.Clear ();
 			paper_properties_icon_store.AppendValues (icon, label, paper.FilePath);
+			paper_properties_icon_view.TooltipText = fileName;
 		}
 
         public MainWindow ()
@@ -273,6 +269,7 @@ namespace Papeles
             main_toolbar.IconSize = IconSize.SmallToolbar;
             document_toolbar.IconSize = IconSize.SmallToolbar;
 
+			main_window.Title = "Papeles";
             main_window.ShowAll ();
         }
 
