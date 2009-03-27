@@ -265,7 +265,6 @@ namespace Papeles
 			main_toolbar.IconSize     = IconSize.SmallToolbar;
 			document_toolbar.IconSize = IconSize.SmallToolbar;
 
-			main_window.Title = "Papeles";
 			main_window.ShowAll ();
 		}
 
@@ -310,7 +309,18 @@ namespace Papeles
 
 		public void OnEditDocumentInformation (object obj, EventArgs args)
 		{
-			Console.WriteLine("Edit document information");
+			TreeSelection selection = document_treeview.Selection;
+
+			if (selection.CountSelectedRows () == 1) {
+				TreePath path = selection.GetSelectedRows ()[0];
+				TreeIter iter;
+				int id;
+
+				library_store.GetIter (out iter, path);
+				id = Convert.ToInt32(library_store.GetValue (iter, (int) Column.ID) as string);
+
+				new EditPaperInformationDialog (Library.GetPaper (id));
+			}
 		}
 
 		public void OnEditRemoveFromLibrary (object obj, EventArgs args)
@@ -321,10 +331,6 @@ namespace Papeles
 		public void OnEditDeleteFromDrive (object obj, EventArgs args)
 		{
 			Console.WriteLine("Delete from drive");
-		}
-
-		public void OnEditProperties (object obj, EventArgs args)
-		{
 		}
 
 		public void OnEditPreferences (object obj, EventArgs args)
