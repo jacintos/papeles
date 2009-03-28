@@ -17,12 +17,15 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+using FSpot.Utils;
+
 namespace Papeles
 {
 	public class PapelesApp
 	{
 		public static void Main (string[] args)
 		{
+			Log.Debugging = true;
 			new PapelesApp ();
 		}
 

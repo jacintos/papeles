@@ -20,6 +20,7 @@
 using Banshee.Base;
 using Banshee.Widgets;
 using Commons.Collections;
+using FSpot.Utils;
 using Gtk;
 using NVelocity;
 using NVelocity.App;
@@ -377,7 +378,7 @@ namespace Papeles
 			if (id != 0)
 				new EditPaperInformationDialog (Library.GetPaper (id));
 			else
-				Console.WriteLine ("Editing paper: selected paper has an invalid ID");
+				Log.Warning ("Editing paper: selected paper has an invalid ID");
 		}
 
 		public void OnEditRemoveFromLibrary (object obj, EventArgs args)
@@ -430,7 +431,7 @@ namespace Papeles
 
 			dialog.ProgramName = "Papeles";
 			dialog.Version = "0.1";
-			dialog.Copyright = "Copyright \u00a9 2009 Jacinto Shy, Jr.";
+			dialog.Copyright = "Copyright \u00a9 2009 Jacinto Shy, Jr.\nCopyright \u00a9 2005-2008 Novell, Inc.";
 			dialog.Run (); // TODO: don't block
 			dialog.Destroy ();
 		}
@@ -496,7 +497,7 @@ namespace Papeles
 				DisplayDocument (paper.FilePath);
 			} else {
 				// FIXME: execution arrives here on startup... why?
-				Console.WriteLine ("Selected paper has an invalid ID");
+				Log.Warning ("Selected paper has an invalid ID", null);
 			}
 		}
 

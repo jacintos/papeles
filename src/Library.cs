@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+using FSpot.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -66,7 +67,10 @@ namespace Papeles
 			paper.Journal = "Unknown";
 			paper.Year = "Unknown";
 			paper.Save ();
+
 			papers.Add (paper);
+			Log.DebugFormat ("Added new paper (ID = {0}) at '{1}' to database", paper.ID, paper.FilePath);
+
 			if (PaperAdded != null)
 				PaperAdded (paper);
 		}

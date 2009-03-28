@@ -1,16 +1,18 @@
 Critical:
- * Support PostScript files.
  * Page caching. Currently, all pages in the document are loaded into an HBox, which is stored inside
-   a Scrolled Window.
+   a Scrolled Window. This is pretty lame. I know.
  * Store and retrieve XMP metadata.
  * I18n.
 
 General:
- * Document search using Beagle or Tracker.
+ * Support PostScript files.
+ * Drag'n'drop document importing.
+ * Split code into functional assemblies and minimize the amount of code that must be GPL (i.e.
+   should probably be limited to GUI-related code).
  * Plugin framework using Mono.Addins.
+ * Document search using Beagle or Tracker.
  * Use GIO (gio-sharp) to get icon based on mime-type for right panel. It might be best to wait for
    GTK# 2.14 when it is stable.
- * Drag'n'drop document importing.
 
 Import:
  * Import information from RIS files.

@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+using FSpot.Utils;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -49,9 +50,9 @@ namespace Papeles
 						versionTableExists = true;
 				}
 			} catch (NotSupportedException) {
-				Console.WriteLine ("Unable to get metadata");
+				Log.Warning ("Unable to get database metadata");
 			} catch (ArgumentException) {
-				Console.WriteLine ("Unable to get table names from schema");
+				Log.Warning ("Unable to get table names from schema");
 			}
 			conn.Close ();
 
@@ -66,24 +67,53 @@ namespace Papeles
 			Execute ("CREATE TABLE IF NOT EXISTS version ( version TEXT )");
 		}
 
+		/// <summary>
+		/// Special case of Execute where the ID of the row that was just inserted is returned.
+		/// </summary>
+		public static object Insert (string command, Object obj, Dictionary<string, DbType> lookup)
+		{
+			SqliteConnection conn = new SqliteConnection (data_source);
+			SqliteCommand cmd;
+			object result = null;
+
+			conn.Open ();
+			cmd = new SqliteCommand (command, conn);
+
+			try {
+				if (obj != null)
+					Database.AddParameters (cmd, obj, lookup);
+				cmd.ExecuteNonQuery ();
+
+				// Must do this on the same connection, otherwise Sqlite seems to "forget"
+				cmd = new SqliteCommand ("SELECT last_insert_rowid()", conn);
+				result = cmd.ExecuteScalar ();
+			} catch (KeyNotFoundException) {
+				Log.Warning ("Missing a parameter somewhere; not executing SQL statement");
+			} catch (Exception e) {
+				Log.Exception ("Exception occurred while executing query", e);
+			} finally {
+				cmd.Dispose ();
+				conn.Dispose ();
+			}
+			return result;
+		}
+
 		public static void Execute (string command, Object obj, Dictionary<string, DbType> lookup)
 		{
 			SqliteConnection conn = new SqliteConnection (data_source);
 			SqliteCommand cmd;
 
 			conn.Open ();
-			cmd = conn.CreateCommand ();
-			cmd.CommandText = command;
+			cmd = new SqliteCommand (command, conn);
 
 			try {
 				if (obj != null)
 					Database.AddParameters (cmd, obj, lookup);
 				cmd.ExecuteNonQuery ();
 			} catch (KeyNotFoundException) {
-				Console.WriteLine ("Missing a parameter somewhere; not executing SQL statement");
+				Log.Warning ("Missing a parameter somewhere; not executing SQL statement");
 			} catch (Exception e) {
-				Console.WriteLine ("Exception occurred while executing query");
-				Console.WriteLine (e.StackTrace);
+				Log.Exception ("Exception occurred while executing query", e);
 			} finally {
 				cmd.Dispose ();
 				conn.Dispose ();
@@ -99,22 +129,24 @@ namespace Papeles
 		{
 			SqliteConnection conn = new SqliteConnection (data_source);
 			SqliteCommand cmd;
+			object result = null;
 
 			conn.Open ();
-			cmd = conn.CreateCommand ();
-			cmd.CommandText = command;
+			cmd = new SqliteCommand (command, conn);
 
 			try {
 				if (obj != null)
 					Database.AddParameters (cmd, obj, lookup);
-				return cmd.ExecuteScalar ();
+				result = cmd.ExecuteScalar ();
 			} catch (KeyNotFoundException) {
-				Console.WriteLine ("Missing a parameter somewhere; not executing SQL statement");
+				Log.Warning ("Missing a parameter somewhere; not executing SQL statement");
 			} catch (Exception e) {
-				Console.WriteLine ("Exception occurred while executing query");
-				Console.WriteLine (e.StackTrace);
+				Log.Exception (e);
+			} finally {
+				cmd.Dispose ();
+				conn.Dispose ();
 			}
-			return null;
+			return result;
 		}
 
 		public static object ExecuteScalar (string command)
@@ -129,14 +161,12 @@ namespace Papeles
 			DbDataReader reader;
 
 			conn.Open ();
-			cmd = conn.CreateCommand ();
-			cmd.CommandText = query;
+			cmd = new SqliteCommand (query, conn);
 
 			try {
 				reader = cmd.ExecuteReader ();
 			} catch (Exception e) {
-				Console.WriteLine ("Exception occurred while executing query");
-				Console.WriteLine (e.StackTrace);
+				Log.Exception ("Exception occurred while executing query", e);
 				return null;
 			}
 
@@ -169,11 +199,11 @@ namespace Papeles
 				try {
 					prop = type.GetProperty (property_map [column]);
 				} catch (KeyNotFoundException) {
-					Console.WriteLine (String.Format ("No mapping to property from column {0}", column));
+					Log.WarningFormat ("No mapping to property from column {0}", column);
 					continue;
 				}
 				if (prop == null) {
-					Console.WriteLine (String.Format ("Unable to find property with name {0}", column));
+					Log.WarningFormat ("Unable to find property with name {0}", column);
 					continue;
 				}
 				if (reader.IsDBNull (columnNumber)) {
@@ -199,7 +229,7 @@ namespace Papeles
 						break;
 					}
 				} catch (KeyNotFoundException) {
-					Console.WriteLine (String.Format ("Attempted to look up invalid column '{0}'", column));
+					Log.WarningFormat ("Attempted to look up invalid column '{0}'", column);
 				}
 			}
 		}

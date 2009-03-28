@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+using FSpot.Utils;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -66,8 +67,8 @@ namespace Papeles
     @Authors, @Uri, @Doi, @Title, @Journal, @Volume, @Number, @Month, @Pages, @Year, @Abstract,
     @Notes, @CiteKey, @Keywords, @FilePath, @Rating, @Flagged, @ImportedAt, @ReadAt
 )";
-				Database.Execute (command, this, properties_lookup);
-				ID = Convert.ToInt32 (Database.ExecuteScalar ("SELECT last_insert_rowid()"));
+				ID = Convert.ToInt32 (Database.Insert (command, this, properties_lookup));
+				Log.DebugFormat ("ID of paper just inserted = {0}", ID);
 			} else {
 				string command =
 @"UPDATE papers SET

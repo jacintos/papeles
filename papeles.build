@@ -28,6 +28,7 @@
         <include name="Mono.Cairo.dll"/>
         <include name="Mono.Data.Sqlite.dll"/>
         <include name="System.Data.dll"/>
+        <include name="Mono.Posix.dll"/>
       </references>
 
       <resources prefix="">
