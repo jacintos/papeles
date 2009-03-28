@@ -107,18 +107,29 @@ namespace Papeles
 		/// </summary>
 		void CreateLibraryView ()
 		{
+			CellRendererText authorsRenderer =  new CellRendererText ();
+			CellRendererText titleRenderer   =  new CellRendererText ();
+			CellRendererText journalRenderer =  new CellRendererText ();
+			CellRendererText yearRenderer    =  new CellRendererText ();
+			CellRendererText idRenderer      =  new CellRendererText ();
+
+			authorsRenderer.Editable = true;
+			titleRenderer.Editable   = true;
+			journalRenderer.Editable = true;
+			yearRenderer.Editable    = true;
+
+			authorsRenderer.Edited += OnLibraryPaperAuthorCellEdited;
+			titleRenderer.Edited   += OnLibraryPaperTitleCellEdited;
+			journalRenderer.Edited += OnLibraryPaperJournalCellEdited;
+			yearRenderer.Edited    += OnLibraryPaperYearCellEdited;
+
 			// TreeViewColumn flagColumn    = new TreeViewColumn ("Flag",    new CellRendererText (),
 			// 												   "text",    Column.Flag);
-			TreeViewColumn authorsColumn = new TreeViewColumn ("Authors", new CellRendererText (),
-									   "text",    Column.Authors);
-			TreeViewColumn titleColumn   = new TreeViewColumn ("Title",   new CellRendererText (),
-									   "text",    Column.Title);
-			TreeViewColumn journalColumn = new TreeViewColumn ("Journal", new CellRendererText (),
-									   "text",    Column.Journal);
-			TreeViewColumn yearColumn    = new TreeViewColumn ("Year",    new CellRendererText (),
-									   "text",    Column.Year);
-			TreeViewColumn idColumn      = new TreeViewColumn ("ID",      new CellRendererText (),
-									   "text",    Column.ID);
+			TreeViewColumn authorsColumn = new TreeViewColumn ("Authors", authorsRenderer, "text", Column.Authors);
+			TreeViewColumn titleColumn   = new TreeViewColumn ("Title",   titleRenderer,   "text", Column.Title);
+			TreeViewColumn journalColumn = new TreeViewColumn ("Journal", journalRenderer, "text", Column.Journal);
+			TreeViewColumn yearColumn    = new TreeViewColumn ("Year",    yearRenderer,    "text", Column.Year);
+			TreeViewColumn idColumn      = new TreeViewColumn ("ID",      idRenderer,      "text", Column.ID);
 			// TreeViewColumn ratingColumn  = new TreeViewColumn ("Rating",  new CellRendererText (),
 			// 												   "text",    Column.Rating);
 
@@ -294,6 +305,33 @@ namespace Papeles
 			statusbar.Push (1, String.Format ("{0} papers", Library.Count));
 		}
 
+		void SetLibraryPaperCell (Column column, string rawPath, string value)
+		{
+			TreePath path = new TreePath (rawPath);
+			TreeIter iter;
+
+			library_store.GetIter (out iter, path);
+			library_store.SetValue (iter, (int) column, value);
+
+			Paper paper = Library.GetPaper (Convert.ToInt32 (library_store.GetValue (iter, (int) Column.ID)));
+			switch (column) {
+			case Column.Authors:
+				paper.Authors = value;
+				break;
+			case Column.Title:
+				paper.Title = value;
+				break;
+			case Column.Journal:
+				paper.Journal = value;
+				break;
+			case Column.Year:
+				paper.Year = value;
+				break;
+			default:
+				break;
+			}
+			paper.Save ();
+		}
 
 		public MainWindow ()
 		{
@@ -511,6 +549,26 @@ namespace Papeles
 
 			// FIXME: xdg-open on Linux only
 			System.Diagnostics.Process.Start ("xdg-open", String.Format ("\"{0}\"", path));
+		}
+
+		void OnLibraryPaperAuthorCellEdited (object obj, EditedArgs args)
+		{
+			SetLibraryPaperCell (Column.Authors, args.Path, args.NewText);
+		}
+
+		void OnLibraryPaperTitleCellEdited (object obj, EditedArgs args)
+		{
+			SetLibraryPaperCell (Column.Title, args.Path, args.NewText);
+		}
+
+		void OnLibraryPaperJournalCellEdited (object obj, EditedArgs args)
+		{
+			SetLibraryPaperCell (Column.Journal, args.Path, args.NewText);
+		}
+
+		void OnLibraryPaperYearCellEdited (object obj, EditedArgs args)
+		{
+			SetLibraryPaperCell (Column.Year, args.Path, args.NewText);
 		}
 
 		public void AddPaperToLibraryStore (Paper paper)
