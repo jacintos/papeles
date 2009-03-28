@@ -33,14 +33,14 @@ using WebKit;
 
 namespace Papeles
 {
-	enum Column {
+	enum LibraryPaperColumn {
 		//Flag,
 		Authors,
 		Title,
 		Journal,
 		Year,
 		//Rating,
-		ID
+		Object
 	}
 
 	enum PaperPropertiesColumn {
@@ -95,11 +95,12 @@ namespace Papeles
 
 		void CreateLibraryStore ()
 		{
-			library_store = new ListStore (typeof(string), typeof(string), typeof(string), typeof(string),
-						       typeof(string));
+			library_store = new ListStore (typeof (string), typeof (string), typeof (string), typeof (string), typeof (Paper));
 
 			foreach (Paper paper in Library.Papers)
-				AddPaperToLibraryStore (paper);
+				library_store.AppendValues (null, null, null, null, paper);
+
+			statusbar.Push (1, String.Format ("{0} papers", Library.Count));
 		}
 
 		/// <summary>
@@ -111,7 +112,6 @@ namespace Papeles
 			CellRendererText titleRenderer   =  new CellRendererText ();
 			CellRendererText journalRenderer =  new CellRendererText ();
 			CellRendererText yearRenderer    =  new CellRendererText ();
-			CellRendererText idRenderer      =  new CellRendererText ();
 
 			authorsRenderer.Editable = true;
 			titleRenderer.Editable   = true;
@@ -125,20 +125,22 @@ namespace Papeles
 
 			// TreeViewColumn flagColumn    = new TreeViewColumn ("Flag",    new CellRendererText (),
 			// 												   "text",    Column.Flag);
-			TreeViewColumn authorsColumn = new TreeViewColumn ("Authors", authorsRenderer, "text", Column.Authors);
-			TreeViewColumn titleColumn   = new TreeViewColumn ("Title",   titleRenderer,   "text", Column.Title);
-			TreeViewColumn journalColumn = new TreeViewColumn ("Journal", journalRenderer, "text", Column.Journal);
-			TreeViewColumn yearColumn    = new TreeViewColumn ("Year",    yearRenderer,    "text", Column.Year);
-			TreeViewColumn idColumn      = new TreeViewColumn ("ID",      idRenderer,      "text", Column.ID);
+			TreeViewColumn authorsColumn = new TreeViewColumn ("Authors", authorsRenderer, "text", LibraryPaperColumn.Authors);
+			TreeViewColumn titleColumn   = new TreeViewColumn ("Title",   titleRenderer,   "text", LibraryPaperColumn.Title);
+			TreeViewColumn journalColumn = new TreeViewColumn ("Journal", journalRenderer, "text", LibraryPaperColumn.Journal);
+			TreeViewColumn yearColumn    = new TreeViewColumn ("Year",    yearRenderer,    "text", LibraryPaperColumn.Year);
 			// TreeViewColumn ratingColumn  = new TreeViewColumn ("Rating",  new CellRendererText (),
 			// 												   "text",    Column.Rating);
 
-			idColumn.Visible = false;
+			authorsColumn.SetCellDataFunc (authorsRenderer, new TreeCellDataFunc (ShowLibraryPaperCellAuthors));
+			titleColumn.SetCellDataFunc (titleRenderer,     new TreeCellDataFunc (ShowLibraryPaperCellTitle));
+			journalColumn.SetCellDataFunc (journalRenderer, new TreeCellDataFunc (ShowLibraryPaperCellJournal));
+			yearColumn.SetCellDataFunc (yearRenderer,       new TreeCellDataFunc (ShowLibraryPaperCellYear));
 
-			authorsColumn.SortColumnId = (int) Column.Authors;
-			titleColumn.SortColumnId   = (int) Column.Title;
-			journalColumn.SortColumnId = (int) Column.Journal;
-			yearColumn.SortColumnId    = (int) Column.Year;
+			authorsColumn.SortColumnId = (int) LibraryPaperColumn.Authors;
+			titleColumn.SortColumnId   = (int) LibraryPaperColumn.Title;
+			journalColumn.SortColumnId = (int) LibraryPaperColumn.Journal;
+			yearColumn.SortColumnId    = (int) LibraryPaperColumn.Year;
 			// ratingColumn.SortColumnId  = (int) Column.Rating;
 
 			authorsColumn.Expand = true;
@@ -223,6 +225,50 @@ namespace Papeles
 			library_context_menu.ShowAll ();
 		}
 
+		void ShowLibraryPaperCellAuthors (TreeViewColumn tree_column, CellRenderer cell, TreeModel tree_model, TreeIter iter)
+		{
+			Paper paper = library_store.GetValue (iter, (int) LibraryPaperColumn.Object) as Paper;
+
+			if (paper == null) {
+				Log.Warning ("Attempted to render authors cell for missing paper");
+				return;
+			}
+			(cell as CellRendererText).Markup = paper.Authors != null ? paper.Authors : "";
+		}
+
+		void ShowLibraryPaperCellTitle (TreeViewColumn tree_column, CellRenderer cell, TreeModel tree_model, TreeIter iter)
+		{
+			Paper paper = library_store.GetValue (iter, (int) LibraryPaperColumn.Object) as Paper;
+
+			if (paper == null) {
+				Log.Warning ("Attempted to render title cell for missing paper");
+				return;
+			}
+			(cell as CellRendererText).Markup = paper.Title != null ? paper.Title : "";
+		}
+
+		void ShowLibraryPaperCellJournal (TreeViewColumn tree_column, CellRenderer cell, TreeModel tree_model, TreeIter iter)
+		{
+			Paper paper = library_store.GetValue (iter, (int) LibraryPaperColumn.Object) as Paper;
+
+			if (paper == null) {
+				Log.Warning ("Attempted to render journal cell for missing paper");
+				return;
+			}
+			(cell as CellRendererText).Markup = paper.Journal != null ? paper.Journal : "";
+		}
+
+		void ShowLibraryPaperCellYear (TreeViewColumn tree_column, CellRenderer cell, TreeModel tree_model, TreeIter iter)
+		{
+			Paper paper = library_store.GetValue (iter, (int) LibraryPaperColumn.Object) as Paper;
+
+			if (paper == null) {
+				Log.Warning ("Attempted to render year cell for missing paper");
+				return;
+			}
+			(cell as CellRendererText).Markup = paper.Year != null ? paper.Year : "";
+		}
+
 		public void ShowPaperInformation (Paper paper)
 		{
 			Template template = template_engine.GetTemplate ("paperinfo.vm");
@@ -245,9 +291,9 @@ namespace Papeles
 		}
 
 		/// <summary>
-		/// Return ID of first selected paper.
+		/// Return the first selected paper.
 		/// </summary>
-		int GetSelectedPaperId ()
+		Paper GetSelectedPaper ()
 		{
 			TreeSelection selection = document_treeview.Selection;
 
@@ -256,17 +302,17 @@ namespace Papeles
 				TreeIter iter;
 
 				library_store.GetIter (out iter, path);
-				return Convert.ToInt32(library_store.GetValue (iter, (int) Column.ID) as string);
+				return library_store.GetValue (iter, (int) LibraryPaperColumn.Object) as Paper;
 			}
-			return 0;
+			return null;
 		}
 
 		/// <summary>
-		/// Return list of IDs of currently selected papers.
+		/// Return list of currently selected papers.
 		/// </summary>
-		List<int> GetSelectedPaperIds ()
+		List<Paper> GetSelectedPapers ()
 		{
-			List<int> selected = new List<int> ();
+			List<Paper> selected = new List<Paper> ();
 			TreeSelection selection = document_treeview.Selection;
 
 			if (selection.CountSelectedRows () > 0) {
@@ -276,13 +322,13 @@ namespace Papeles
 					TreeIter iter;
 
 					library_store.GetIter (out iter, path);
-					selected.Add (Convert.ToInt32(library_store.GetValue (iter, (int) Column.ID) as string));
+					selected.Add (library_store.GetValue (iter, (int) LibraryPaperColumn.Object) as Paper);
 				}
 			}
 			return selected;
 		}
 
-		delegate void ProcessPaper (int id);
+		delegate void ProcessPaper (Paper paper);
 
 		void RemoveSelectedItems (ProcessPaper callback)
 		{
@@ -293,38 +339,37 @@ namespace Papeles
 
 				foreach (TreePath path in paths) {
 					TreeIter iter;
-					int id;
 
 					library_store.GetIter (out iter, path);
-					id = Convert.ToInt32(library_store.GetValue (iter, (int) Column.ID) as string);
-					library_store.Remove (ref iter);
 					if (callback != null)
-						callback (id);
+						callback (library_store.GetValue (iter, (int) LibraryPaperColumn.Object) as Paper);
+					library_store.Remove (ref iter);
 				}
 			}
 			statusbar.Push (1, String.Format ("{0} papers", Library.Count));
 		}
 
-		void SetLibraryPaperCell (Column column, string rawPath, string value)
+		void SetLibraryPaperCell (LibraryPaperColumn column, string rawPath, string value)
 		{
 			TreePath path = new TreePath (rawPath);
 			TreeIter iter;
 
 			library_store.GetIter (out iter, path);
-			library_store.SetValue (iter, (int) column, value);
+			// library_store.SetValue (iter, (int) column, value);
 
-			Paper paper = Library.GetPaper (Convert.ToInt32 (library_store.GetValue (iter, (int) Column.ID)));
+			Paper paper = library_store.GetValue (iter, (int) LibraryPaperColumn.Object) as Paper;
+
 			switch (column) {
-			case Column.Authors:
+			case LibraryPaperColumn.Authors:
 				paper.Authors = value;
 				break;
-			case Column.Title:
+			case LibraryPaperColumn.Title:
 				paper.Title = value;
 				break;
-			case Column.Journal:
+			case LibraryPaperColumn.Journal:
 				paper.Journal = value;
 				break;
-			case Column.Year:
+			case LibraryPaperColumn.Year:
 				paper.Year = value;
 				break;
 			default:
@@ -411,12 +456,12 @@ namespace Papeles
 
 		public void OnEditDocumentInformation (object obj, EventArgs args)
 		{
-			int id = GetSelectedPaperId ();
+			Paper paper = GetSelectedPaper ();
 
-			if (id != 0)
-				new EditPaperInformationDialog (Library.GetPaper (id));
+			if (paper != null)
+				new EditPaperInformationDialog (paper);
 			else
-				Log.Warning ("Editing paper: selected paper has an invalid ID");
+				Log.Warning ("Tried to edit paper information but no paper was selected");
 		}
 
 		public void OnEditRemoveFromLibrary (object obj, EventArgs args)
@@ -433,7 +478,7 @@ namespace Papeles
 
 			try {
 				if (ResponseType.Yes == (ResponseType) dialog.Run ())
-					RemoveSelectedItems (paperId => Library.Remove (paperId));
+					RemoveSelectedItems (paper => Library.Remove (paper));
 			} finally {
 				dialog.Destroy ();
 			}
@@ -453,7 +498,7 @@ namespace Papeles
 
 			try {
 				if (ResponseType.Yes == (ResponseType) dialog.Run ())
-					RemoveSelectedItems (paperId => Library.Delete (paperId));
+					RemoveSelectedItems (paper => Library.Delete (paper));
 			} finally {
 				dialog.Destroy ();
 			}
@@ -526,16 +571,13 @@ namespace Papeles
 
 		public void OnLibrarySelectedPaperChanged (object obj, EventArgs args)
 		{
-			int id = GetSelectedPaperId ();
+			Paper paper = GetSelectedPaper ();
 
-			if (id != 0) {
-				Paper paper = Library.GetPaper (id);
-
+			if (paper != null) {
 				ShowPaperInformation (paper);
 				DisplayDocument (paper.FilePath);
 			} else {
-				// FIXME: execution arrives here on startup... why?
-				Log.Warning ("Selected paper has an invalid ID", null);
+				Log.Warning ("Tried to display paper on selection change but no paper was selected");
 			}
 		}
 
@@ -553,27 +595,27 @@ namespace Papeles
 
 		void OnLibraryPaperAuthorCellEdited (object obj, EditedArgs args)
 		{
-			SetLibraryPaperCell (Column.Authors, args.Path, args.NewText);
+			SetLibraryPaperCell (LibraryPaperColumn.Authors, args.Path, args.NewText);
 		}
 
 		void OnLibraryPaperTitleCellEdited (object obj, EditedArgs args)
 		{
-			SetLibraryPaperCell (Column.Title, args.Path, args.NewText);
+			SetLibraryPaperCell (LibraryPaperColumn.Title, args.Path, args.NewText);
 		}
 
 		void OnLibraryPaperJournalCellEdited (object obj, EditedArgs args)
 		{
-			SetLibraryPaperCell (Column.Journal, args.Path, args.NewText);
+			SetLibraryPaperCell (LibraryPaperColumn.Journal, args.Path, args.NewText);
 		}
 
 		void OnLibraryPaperYearCellEdited (object obj, EditedArgs args)
 		{
-			SetLibraryPaperCell (Column.Year, args.Path, args.NewText);
+			SetLibraryPaperCell (LibraryPaperColumn.Year, args.Path, args.NewText);
 		}
 
 		public void AddPaperToLibraryStore (Paper paper)
 		{
-			library_store.AppendValues (paper.Authors, paper.Title, paper.Journal, paper.Year, Convert.ToString(paper.ID));
+			library_store.AppendValues (null, null, null, null, paper);
 			statusbar.Push (1, String.Format ("{0} papers", Library.Count));
 		}
 	}

@@ -86,13 +86,14 @@ namespace Papeles
 
 		public static void Remove (int id)
 		{
-			Paper paper = null;
-			SavePaper save = p => { paper = p; return true; };
+			Paper paper = GetPaper (id);
+			Remove (paper);
+		}
 
-			papers.RemoveAll (p => p.ID == id && save (p));
-			if (paper == null)
-				return;
-
+		public static void Remove (Paper paper)
+		{
+			// FIXME: raise exception if paper is null
+			papers.Remove (paper);
 			try {
 				// FIXME: ensure event handlers do not alter the paper
 				if (PaperRemoved != null)
@@ -105,12 +106,13 @@ namespace Papeles
 		public static void Delete (int id)
 		{
 			Paper paper = GetPaper (id);
+			Delete (paper);
+		}
 
-			if (paper == null)
-				return;
-
+		public static void Delete (Paper paper)
+		{
+			// FIXME: raise exception if paper is null
 			papers.Remove (paper);
-
 			try {
 				// FIXME: ensure event handlers do not alter the paper
 				if (PaperDeleted != null)
