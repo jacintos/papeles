@@ -269,7 +269,7 @@ namespace Papeles
 			(cell as CellRendererText).Markup = paper.Year != null ? paper.Year : "";
 		}
 
-		public void ShowPaperInformation (Paper paper)
+		void ShowPaperInformation (Paper paper)
 		{
 			Template template = template_engine.GetTemplate ("paperinfo.vm");
 			VelocityContext context = new VelocityContext ();
@@ -415,7 +415,7 @@ namespace Papeles
 			main_window.ShowAll ();
 		}
 
-		// Event handlers
+		#region Glade-connected Event Handlers
 
 		public void OnDelete (object obj, DeleteEventArgs args)
 		{
@@ -567,9 +567,11 @@ namespace Papeles
 			ShowDocumentTreeViewContextMenu ();
 		}
 
-		// Non-GTK widget callbacks
+		#endregion
 
-		public void OnLibrarySelectedPaperChanged (object obj, EventArgs args)
+		#region Internal Event Handlers
+
+		void OnLibrarySelectedPaperChanged (object obj, EventArgs args)
 		{
 			Paper paper = GetSelectedPaper ();
 
@@ -581,7 +583,7 @@ namespace Papeles
 			}
 		}
 
-		public void OnPropertiesIconActivated (object obj, ItemActivatedArgs args)
+		void OnPropertiesIconActivated (object obj, ItemActivatedArgs args)
 		{
 			TreeIter iter;
 			string path;
@@ -613,10 +615,12 @@ namespace Papeles
 			SetLibraryPaperCell (LibraryPaperColumn.Year, args.Path, args.NewText);
 		}
 
-		public void AddPaperToLibraryStore (Paper paper)
+		void AddPaperToLibraryStore (Paper paper)
 		{
 			library_store.AppendValues (null, null, null, null, paper);
 			statusbar.Push (1, String.Format ("{0} papers", Library.Count));
 		}
+
+		#endregion
 	}
 }

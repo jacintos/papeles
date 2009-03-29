@@ -82,8 +82,6 @@ namespace Papeles
 				PaperAdded (paper);
 		}
 
-		delegate bool SavePaper (Paper p);
-
 		public static void Remove (int id)
 		{
 			Paper paper = GetPaper (id);
