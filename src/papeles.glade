@@ -457,6 +457,7 @@
   <widget class="GtkDialog" id="edit_paper_information_dialog">
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Paper Information</property>
+    <property name="default_width">320</property>
     <property name="type_hint">normal</property>
     <property name="has_separator">False</property>
     <child internal-child="vbox">
@@ -486,6 +487,7 @@
                     <child>
                       <widget class="GtkLabel" id="label4">
                         <property name="visible">True</property>
+                        <property name="xalign">0</property>
                         <property name="label" translatable="yes">&lt;b&gt;Filename: &lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </widget>
@@ -496,6 +498,7 @@
                     <child>
                       <widget class="GtkLabel" id="paper_file_name_label">
                         <property name="visible">True</property>
+                        <property name="xalign">0</property>
                       </widget>
                       <packing>
                         <property name="position">1</property>
