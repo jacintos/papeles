@@ -125,10 +125,10 @@ namespace Papeles
 
 			// TreeViewColumn flagColumn    = new TreeViewColumn ("Flag",    new CellRendererText (),
 			// 												   "text",    Column.Flag);
-			TreeViewColumn authorsColumn = new TreeViewColumn ("Authors", authorsRenderer, "text", LibraryPaperColumn.Authors);
-			TreeViewColumn titleColumn   = new TreeViewColumn ("Title",   titleRenderer,   "text", LibraryPaperColumn.Title);
-			TreeViewColumn journalColumn = new TreeViewColumn ("Journal", journalRenderer, "text", LibraryPaperColumn.Journal);
-			TreeViewColumn yearColumn    = new TreeViewColumn ("Year",    yearRenderer,    "text", LibraryPaperColumn.Year);
+			TreeViewColumn authorsColumn = new TreeViewColumn ("Authors", authorsRenderer, "text", (int) LibraryPaperColumn.Authors);
+			TreeViewColumn titleColumn   = new TreeViewColumn ("Title",   titleRenderer,   "text", (int) LibraryPaperColumn.Title);
+			TreeViewColumn journalColumn = new TreeViewColumn ("Journal", journalRenderer, "text", (int) LibraryPaperColumn.Journal);
+			TreeViewColumn yearColumn    = new TreeViewColumn ("Year",    yearRenderer,    "text", (int) LibraryPaperColumn.Year);
 			// TreeViewColumn ratingColumn  = new TreeViewColumn ("Rating",  new CellRendererText (),
 			// 												   "text",    Column.Rating);
 
@@ -137,15 +137,20 @@ namespace Papeles
 			journalColumn.SetCellDataFunc (journalRenderer, new TreeCellDataFunc (ShowLibraryPaperCellJournal));
 			yearColumn.SetCellDataFunc (yearRenderer,       new TreeCellDataFunc (ShowLibraryPaperCellYear));
 
+			library_store.SetSortFunc ((int) LibraryPaperColumn.Authors, SortLibraryPaperCellAuthors);
+			library_store.SetSortFunc ((int) LibraryPaperColumn.Title,   SortLibraryPaperCellTitle);
+			library_store.SetSortFunc ((int) LibraryPaperColumn.Journal, SortLibraryPaperCellJournal);
+			library_store.SetSortFunc ((int) LibraryPaperColumn.Year,    SortLibraryPaperCellYear);
+
 			authorsColumn.SortColumnId = (int) LibraryPaperColumn.Authors;
 			titleColumn.SortColumnId   = (int) LibraryPaperColumn.Title;
 			journalColumn.SortColumnId = (int) LibraryPaperColumn.Journal;
 			yearColumn.SortColumnId    = (int) LibraryPaperColumn.Year;
 			// ratingColumn.SortColumnId  = (int) Column.Rating;
 
-			authorsColumn.Expand = true;
-			titleColumn.Expand   = true;
-			journalColumn.Expand = true;
+			authorsColumn.Expand = false;
+			titleColumn.Expand   = false;
+			journalColumn.Expand = false;
 			yearColumn.Expand    = true;
 			// ratingColumn.Expand  = true;
 
@@ -225,6 +230,8 @@ namespace Papeles
 			library_context_menu.ShowAll ();
 		}
 
+		#region Library TreeView Functions
+
 		void ShowLibraryPaperCellAuthors (TreeViewColumn tree_column, CellRenderer cell, TreeModel tree_model, TreeIter iter)
 		{
 			Paper paper = library_store.GetValue (iter, (int) LibraryPaperColumn.Object) as Paper;
@@ -268,6 +275,40 @@ namespace Papeles
 			}
 			(cell as CellRendererText).Markup = paper.Year != null ? paper.Year : "";
 		}
+
+		int SortLibraryPaperCellAuthors (TreeModel model, TreeIter iterA, TreeIter iterB)
+		{
+			Paper paperA = library_store.GetValue (iterA, (int) LibraryPaperColumn.Object) as Paper;
+			Paper paperB = library_store.GetValue (iterB, (int) LibraryPaperColumn.Object) as Paper;
+
+			return String.Compare (paperA.Authors, paperB.Authors);
+		}
+
+		int SortLibraryPaperCellTitle (TreeModel model, TreeIter iterA, TreeIter iterB)
+		{
+			Paper paperA = library_store.GetValue (iterA, (int) LibraryPaperColumn.Object) as Paper;
+			Paper paperB = library_store.GetValue (iterB, (int) LibraryPaperColumn.Object) as Paper;
+
+			return String.Compare (paperA.Title, paperB.Title);
+		}
+
+		int SortLibraryPaperCellJournal (TreeModel model, TreeIter iterA, TreeIter iterB)
+		{
+			Paper paperA = library_store.GetValue (iterA, (int) LibraryPaperColumn.Object) as Paper;
+			Paper paperB = library_store.GetValue (iterB, (int) LibraryPaperColumn.Object) as Paper;
+
+			return String.Compare (paperA.Journal, paperB.Journal);
+		}
+
+		int SortLibraryPaperCellYear (TreeModel model, TreeIter iterA, TreeIter iterB)
+		{
+			Paper paperA = library_store.GetValue (iterA, (int) LibraryPaperColumn.Object) as Paper;
+			Paper paperB = library_store.GetValue (iterB, (int) LibraryPaperColumn.Object) as Paper;
+
+			return String.Compare (paperA.Year, paperB.Year);
+		}
+
+		#endregion
 
 		void ShowPaperInformation (Paper paper)
 		{
