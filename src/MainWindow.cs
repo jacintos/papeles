@@ -493,6 +493,12 @@ namespace Papeles
 
 		public void OnEditSelectAll (object obj, EventArgs args)
 		{
+			document_treeview.Selection.SelectAll ();
+		}
+
+		public void OnEditSelectNone (object obj, EventArgs args)
+		{
+			document_treeview.Selection.UnselectAll ();
 		}
 
 		public void OnEditDocumentInformation (object obj, EventArgs args)
@@ -619,8 +625,6 @@ namespace Papeles
 			if (paper != null) {
 				ShowPaperInformation (paper);
 				DisplayDocument (paper.FilePath);
-			} else {
-				Log.Warning ("Tried to display paper on selection change but no paper was selected");
 			}
 		}
 
