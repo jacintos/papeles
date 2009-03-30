@@ -453,6 +453,7 @@ namespace Papeles
 			main_toolbar.IconSize     = IconSize.SmallToolbar;
 			document_toolbar.IconSize = IconSize.SmallToolbar;
 
+			main_window.IconName = "papeles";
 			main_window.ShowAll ();
 		}
 
@@ -559,6 +560,7 @@ namespace Papeles
 		{
 			AboutDialog dialog = new AboutDialog ();
 
+			dialog.Logo = Gdk.Pixbuf.LoadFromResource ("papeles-128.png");
 			dialog.ProgramName = "Papeles";
 			dialog.Version = "0.1";
 			dialog.Copyright = "Copyright \u00a9 2009 Jacinto Shy, Jr.\nCopyright \u00a9 2005-2008 Novell, Inc.";
