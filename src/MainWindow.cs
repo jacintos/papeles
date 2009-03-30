@@ -62,6 +62,7 @@ namespace Papeles
 		[Glade.Widget] Statusbar statusbar;
 
 		Menu library_context_menu;
+		Menu property_file_context_menu;
 		ListStore library_store;
 		ListStore paper_properties_icon_store;
 		WebView paper_properties_web_view;
@@ -91,6 +92,22 @@ namespace Papeles
 			library_context_menu.Add (new SeparatorMenuItem ());
 			library_context_menu.Add (remove);
 			library_context_menu.Add (delete);
+		}
+
+		void CreatePropertyFileContextMenu ()
+		{
+			ImageMenuItem link = new ImageMenuItem ("_Set Link to File");
+			ImageMenuItem remove = new ImageMenuItem ("_Remove Link to File");
+
+			link.Image   = new Image (Stock.Edit, IconSize.Menu);
+			remove.Image = new Image (Stock.Remove, IconSize.Menu);
+
+			link.Activated   += OnPropertyFileSetLink;
+			remove.Activated += OnPropertyFileRemoveLink;
+
+			property_file_context_menu = new Menu ();
+			property_file_context_menu.Add (link);
+			property_file_context_menu.Add (remove);
 		}
 
 		void CreateLibraryStore ()
@@ -194,6 +211,7 @@ namespace Papeles
 			paper_properties_icon_view.ItemWidth = 185;
 			paper_properties_icon_view.Orientation = Orientation.Horizontal;
 			paper_properties_icon_view.ItemActivated += OnPropertiesIconActivated;
+			paper_properties_icon_view.ButtonPressEvent += OnPropertyFileClicked;
 			paper_properties_frame_inner.Add (paper_properties_icon_view);
 
 			paper_properties_web_view = new WebView ();
@@ -234,6 +252,12 @@ namespace Papeles
 		{
 			library_context_menu.Popup ();
 			library_context_menu.ShowAll ();
+		}
+
+		void ShowPropertyFileContextMenu ()
+		{
+			property_file_context_menu.Popup ();
+			property_file_context_menu.ShowAll ();
 		}
 
 		#region Library TreeView Functions
@@ -328,13 +352,17 @@ namespace Papeles
 
 			// FIXME: get icon based on mime-type
 			Gdk.Pixbuf icon = IconTheme.Default.LoadIcon ("gnome-fs-regular", 32, (IconLookupFlags) 0);
-			string fileName = Path.GetFileName (paper.FilePath);
-			string fileSize = "2.8 MB";
-			string label = String.Format ("<b>{0}</b>\n{1}", fileName.Truncate (18, "..."), fileSize);
+			string label = "";
 
+			if (paper.FilePath != null) {
+				string fileName = Path.GetFileName (paper.FilePath);
+				string fileSize = "2.8 MB";
+
+				label = String.Format ("<b>{0}</b>\n{1}", fileName.Truncate (18, "..."), fileSize);
+				paper_properties_icon_view.TooltipText = paper.FilePath;
+			}
 			paper_properties_icon_store.Clear ();
 			paper_properties_icon_store.AppendValues (icon, label, paper.FilePath);
-			paper_properties_icon_view.TooltipText = fileName;
 		}
 
 		/// <summary>
@@ -460,6 +488,7 @@ namespace Papeles
 			Library.PaperAdded += AddPaperToLibraryStore;
       
 			CreateDocumentTreeViewContextMenu ();
+			CreatePropertyFileContextMenu ();
 			CreateLibraryStore ();
 			CreateLibraryView ();
 			CreateTemplateEngine ();
@@ -623,6 +652,7 @@ namespace Papeles
 		[GLib.ConnectBefore]
 		public void OnDocumentTreeViewButtonPress (object obj, ButtonPressEventArgs args)
 		{
+			// Handle right clicks
 			if (args.Event.Button == 3)
 				ShowDocumentTreeViewContextMenu ();
 		}
@@ -637,13 +667,21 @@ namespace Papeles
 
 		#region Internal Event Handlers
 
+		[GLib.ConnectBefore]
+		public void OnPropertyFileClicked (object obj, ButtonPressEventArgs args)
+		{
+			if (args.Event.Button == 3)
+				ShowPropertyFileContextMenu ();
+		}
+
 		void OnLibrarySelectedPaperChanged (object obj, EventArgs args)
 		{
 			Paper paper = GetSelectedPaper ();
 
 			if (paper != null) {
 				ShowPaperInformation (paper);
-				DisplayDocument (paper.FilePath);
+				if (paper.FilePath != null)
+					DisplayDocument (paper.FilePath);
 			}
 		}
 
@@ -654,6 +692,9 @@ namespace Papeles
 
 			paper_properties_icon_store.GetIter (out iter, args.Path);
 			path = paper_properties_icon_store.GetValue (iter, (int) PaperPropertiesColumn.FilePath) as string;
+
+			if (path == null)
+				return;
 
 			// FIXME: xdg-open on Linux only
 			System.Diagnostics.Process.Start ("xdg-open", String.Format ("\"{0}\"", path));
@@ -683,6 +724,53 @@ namespace Papeles
 		{
 			library_store.AppendValues (null, null, null, null, paper);
 			statusbar.Push (1, String.Format ("{0} papers", Library.Count));
+		}
+
+		void OnPropertyFileSetLink (object obj, EventArgs args)
+		{
+			FileChooserDialog dialog = new FileChooserDialog ("Link File", null, FileChooserAction.Open,
+									  "Cancel", ResponseType.Cancel,
+									  "Link", ResponseType.Accept);
+			FileFilter filter = new FileFilter ();
+
+			filter.Name = "Documents";
+			filter.AddMimeType ("application/pdf");
+			filter.AddPattern ("*.pdf");
+			// filter.AddMimeType ("application/postscript");
+			// filter.AddPattern ("*.ps");
+			dialog.AddFilter (filter);
+
+			try {
+				if (dialog.Run () == (int) ResponseType.Accept) {
+					Paper paper = GetSelectedPaper ();
+
+					// assert paper != null
+					paper.FilePath = dialog.Filename;
+					paper.Save ();
+				}
+			} finally {
+				dialog.Destroy ();
+			}
+		}
+
+		void OnPropertyFileRemoveLink (object obj, EventArgs args)
+		{
+			string header = "Remove file link?";
+			string message = "Are you sure you want to remove the link to the file on disk? You will have to relink this file if you want to access it again through Papeles.";
+			HigMessageDialog dialog = new HigMessageDialog (main_window, DialogFlags.DestroyWithParent, MessageType.Warning,
+															ButtonsType.YesNo, header, message);
+
+			try {
+				if (ResponseType.Yes == (ResponseType) dialog.Run ()) {
+					Paper paper = GetSelectedPaper ();
+
+					// assert paper != null
+					paper.FilePath = null;
+					paper.Save ();
+				}
+			} finally {
+				dialog.Destroy ();
+			}
 		}
 
 		#endregion

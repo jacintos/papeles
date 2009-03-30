@@ -8,18 +8,22 @@ General:
  * Support PostScript files.
  * Drag'n'drop document importing.
  * Search filter.
+ * Plugin framework using Mono.Addins.
+ * Document search using Beagle or Tracker.
+ * Share papers over the local network with Zeroconf.
+
+Maintenance:
  * Split code into functional assemblies and minimize the amount of code that must be GPL (i.e.
    should probably be limited to GUI-related code).
  * Menu accelerator keys. These seem to break with Glade#, so this probably depends on Gtk.Builder
    (which should be available with the GTK# 2.14 release).
- * Plugin framework using Mono.Addins.
- * Document search using Beagle or Tracker.
  * Use GIO (gio-sharp) to get icon based on mime-type for right panel. It might be best to wait for
    GTK# 2.14 when it is stable.
 
-Import:
+Import/Export:
  * Import information from RIS files.
  * Import information from BibTex.
+ * Export database along with paper metadata.
 
 Integration:
  * PubMed integration (possibly augmented some by HubMed).
