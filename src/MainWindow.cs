@@ -202,10 +202,16 @@ namespace Papeles
 
 		void DisplayDocument (string filePath)
 		{
-			IDocument doc = new PdfDocument ("file://" + filePath, "");
+			IDocument doc;
 			Box box = new VBox (true, 0);
 			Gdk.Color white = new Gdk.Color (0xFF, 0xFF, 0xFF);
 
+			if (!File.Exists (filePath)) {
+				FileNotFoundErrorDialog (filePath);
+				return;
+			}
+
+			doc = new PdfDocument ("file://" + filePath, "");
 			render_context = new RenderContext (0, 1.0);
 			for (int i = 0; i < doc.NPages; i++) {
 				RenderedDocument page = new RenderedDocument (i, render_context, doc);
@@ -417,6 +423,17 @@ namespace Papeles
 				break;
 			}
 			paper.Save ();
+		}
+
+		void FileNotFoundErrorDialog (string filePath)
+		{
+			string header = "Unable to find file";
+			string message = String.Format ("The document at '{0}' does not exist", filePath);
+			HigMessageDialog dialog = new HigMessageDialog (main_window, DialogFlags.DestroyWithParent, MessageType.Error,
+															ButtonsType.Ok, header, message);
+
+			dialog.Run ();
+			dialog.Destroy ();
 		}
 
 		public MainWindow ()
