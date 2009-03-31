@@ -472,6 +472,7 @@ namespace Papeles
 				break;
 			}
 			paper.Save ();
+			ShowPaperInformation (paper);
 		}
 
 		void FileNotFoundErrorDialog (string filePath)
@@ -573,10 +574,12 @@ namespace Papeles
 		{
 			Paper paper = GetSelectedPaper ();
 
-			if (paper != null)
+			if (paper != null) {
 				new EditPaperInformationDialog (paper);
-			else
+				ShowPaperInformation (paper);
+			} else {
 				Log.Warning ("Tried to edit paper information but no paper was selected");
+			}
 		}
 
 		public void OnEditRemoveFromLibrary (object obj, EventArgs args)
