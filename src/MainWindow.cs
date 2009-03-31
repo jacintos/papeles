@@ -229,18 +229,22 @@ namespace Papeles
 				return;
 			}
 
-			doc = new PdfDocument ("file://" + filePath, "");
-			render_context = new RenderContext (0, 1.0);
-			for (int i = 0; i < doc.NPages; i++) {
-				RenderedDocument page = new RenderedDocument (i, render_context, doc);
+			try {
+				doc = new PdfDocument ("file://" + filePath, "");
+				render_context = new RenderContext (0, 1.0);
+				for (int i = 0; i < doc.NPages; i++) {
+					RenderedDocument page = new RenderedDocument (i, render_context, doc);
 
-				page.ModifyBg (StateType.Normal, white); // FIXME: probably don't want this
-				box.Add (page);
-				page.Show ();
+					page.ModifyBg (StateType.Normal, white); // FIXME: probably don't want this
+					box.Add (page);
+					page.Show ();
+				}
+				document_viewport.Foreach (document_viewport.Remove);
+				document_viewport.Add (box);
+				box.Show ();
+			} catch (Exception e) {
+				Log.Exception ("Exception occurred while rendering document", e);
 			}
-			document_viewport.Foreach (document_viewport.Remove);
-			document_viewport.Add (box);
-			box.Show ();
 		}
 
 		void QuitApplication ()
@@ -356,13 +360,30 @@ namespace Papeles
 
 			if (paper.FilePath != null) {
 				string fileName = Path.GetFileName (paper.FilePath);
-				string fileSize = "2.8 MB";
+				long fileSize = new FileInfo (paper.FilePath).Length;
 
-				label = String.Format ("<b>{0}</b>\n{1}", fileName.Truncate (18, "..."), fileSize);
+				label = String.Format ("<b>{0}</b>\n{1}", fileName.Truncate (18, "..."), fileSize.ToFileSize ());
 				paper_properties_icon_view.TooltipText = paper.FilePath;
 			}
 			paper_properties_icon_store.Clear ();
 			paper_properties_icon_store.AppendValues (icon, label, paper.FilePath);
+		}
+
+		void UpdatePropertyFileView (string filePath)
+		{
+			TreeIter iter;
+
+			paper_properties_icon_store.IterChildren (out iter);
+
+			if (filePath == null) {
+				paper_properties_icon_store.SetValue (iter, paper_properties_icon_view.MarkupColumn, "");
+			} else {
+				long fileSize = new FileInfo (filePath).Length;
+				string fileName = Path.GetFileName (filePath);
+				string label = String.Format ("<b>{0}</b>\n{1}", fileName.Truncate (18, "..."), fileSize.ToFileSize ());
+
+				paper_properties_icon_store.SetValue (iter, paper_properties_icon_view.MarkupColumn, label);
+			}
 		}
 
 		/// <summary>
@@ -729,8 +750,8 @@ namespace Papeles
 		void OnPropertyFileSetLink (object obj, EventArgs args)
 		{
 			FileChooserDialog dialog = new FileChooserDialog ("Link File", null, FileChooserAction.Open,
-									  "Cancel", ResponseType.Cancel,
-									  "Link", ResponseType.Accept);
+															  "Cancel", ResponseType.Cancel,
+															  "Link", ResponseType.Accept);
 			FileFilter filter = new FileFilter ();
 
 			filter.Name = "Documents";
@@ -747,6 +768,8 @@ namespace Papeles
 					// assert paper != null
 					paper.FilePath = dialog.Filename;
 					paper.Save ();
+					UpdatePropertyFileView (paper.FilePath);
+					DisplayDocument (paper.FilePath);
 				}
 			} finally {
 				dialog.Destroy ();
@@ -767,6 +790,8 @@ namespace Papeles
 					// assert paper != null
 					paper.FilePath = null;
 					paper.Save ();
+					UpdatePropertyFileView (paper.FilePath);
+					// FIXME: close document display if open
 				}
 			} finally {
 				dialog.Destroy ();
