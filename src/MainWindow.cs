@@ -57,6 +57,7 @@ namespace Papeles
 		[Glade.Widget] Toolbar document_toolbar;
 		[Glade.Widget] TreeView document_treeview;
 		[Glade.Widget] HScale toolbar_scale_page;
+		[Glade.Widget] VBox paper_properties_vbox;
 		[Glade.Widget] ScrolledWindow paper_properties_window;
 		[Glade.Widget] Alignment paper_properties_frame_inner;
 		[Glade.Widget] Statusbar statusbar;
@@ -523,6 +524,8 @@ namespace Papeles
 
 			main_window.IconName = "papeles";
 			main_window.ShowAll ();
+
+			paper_properties_vbox.Visible = false;
 		}
 
 		#region Glade-connected Event Handlers
@@ -568,6 +571,9 @@ namespace Papeles
 		public void OnEditSelectNone (object obj, EventArgs args)
 		{
 			document_treeview.Selection.UnselectAll ();
+
+			// Don't preview any document if no paper is selected
+			document_viewport.Foreach (document_viewport.Remove);
 		}
 
 		public void OnEditDocumentInformation (object obj, EventArgs args)
@@ -707,6 +713,7 @@ namespace Papeles
 				if (paper.FilePath != null)
 					DisplayDocument (paper.FilePath);
 			}
+			paper_properties_vbox.Visible = paper != null;
 		}
 
 		void OnPropertiesIconActivated (object obj, ItemActivatedArgs args)
