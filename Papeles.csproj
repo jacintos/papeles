@@ -29,7 +29,6 @@
     <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
     <Reference Include="System.Data" />
     <Reference Include="webkit-sharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=eaa1d335d2e19745" />
-    <Reference Include="Mono.Cairo" />
     <Reference Include="Mono.Data.Sqlite" />
     <Reference Include="glade-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
     <Reference Include="NVelocity, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null">
@@ -40,6 +39,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\poppler-sharp.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Posix" />
+    <Reference Include="System.Core" />
+    <Reference Include="System" />
+    <Reference Include="Mono.Cairo" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -54,6 +57,12 @@
     <Compile Include="src\RenderContext.cs" />
     <Compile Include="src\RenderedDocument.cs" />
     <Compile Include="src\XdgBaseDirectorySpec.cs" />
+    <Compile Include="src\ConsoleCrayon.cs" />
+    <Compile Include="src\EditPaperInformationDialog.cs" />
+    <Compile Include="src\Extensions.cs" />
+    <Compile Include="src\FileSizeFormatProvider.cs" />
+    <Compile Include="src\HigMessageDialog.cs" />
+    <Compile Include="src\Log.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="src\paperinfo.vm">
